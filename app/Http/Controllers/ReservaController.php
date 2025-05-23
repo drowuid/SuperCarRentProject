@@ -35,12 +35,8 @@ class ReservaController extends Controller
     {
         $userId = Auth::id();
 
-        $reservas = Reserva::with([
-            'carro.marca',
-            'carro.localizacoes'
-        ])
-        ->where('user_id', $userId)
-        ->get();
+        $reservas = Reserva::with(['carro.marca', 'carro.localizacoes'])->where('user_id', Auth::id())->get();
+
 
         return view('reservas.minhas', compact('reservas'));
     }

@@ -89,22 +89,8 @@
                 @foreach($carros as $carro)
                     <div class="col-md-4 mb-4">
                         <div class="card h-100 shadow">
-                            @if($carro->marca->nome === 'Toyota' && stripos($carro->modelo, 'Corolla') !== false)
-                                @if($loop->index === 0)
-                                    <img src="{{ asset('build/assets/toyotaw.png') }}"
-                                         class="card-img-top"
-                                         alt="{{ $carro->modelo }}">
-                                @elseif($loop->index === 1)
-                                    <img src="{{ asset('build/assets/toyotaG.png') }}"
-                                         class="card-img-top"
-                                         alt="{{ $carro->modelo }}">
-                                @else
-                                    <img src="{{ asset('build/assets/toyota.png') }}"
-                                         class="card-img-top"
-                                         alt="{{ $carro->modelo }}">
-                                @endif
-                            @elseif(isset($carro->imagem) && $carro->imagem)
-                                <img src="{{ asset('images/cars/' . $carro->imagem) }}"
+                            @if(!empty($carro->imagem))
+                                <img src="{{ $carro->imagem }}"
                                      class="card-img-top"
                                      alt="{{ $carro->modelo }}">
                             @else
@@ -112,6 +98,7 @@
                                      class="card-img-top"
                                      alt="{{ $carro->modelo }}">
                             @endif
+
                             <div class="card-body">
                                 <h5 class="card-title">{{ $carro->modelo }} ({{ $carro->marca->nome }})</h5>
                                 <ul class="list-unstyled">
@@ -135,7 +122,7 @@
         </div>
     </section>
 
-    {{-- Enhanced Footer --}}
+    {{-- Footer --}}
     <footer class="bg-dark text-light pt-5 pb-3">
         <div class="container">
             <div class="row footer-links">

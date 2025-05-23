@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('bens_locaveis', function (Blueprint $table) {
-    $table->string('imagem')->nullable()->after('modelo');
-});
+            $table->string('imagem')->nullable()->after('modelo');
+        });
     }
 
     /**

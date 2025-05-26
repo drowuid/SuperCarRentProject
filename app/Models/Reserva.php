@@ -9,13 +9,10 @@ use App\Models\BemLocavel;
 class Reserva extends Model
 {
     protected $fillable = [
-        'bem_locavel_id',
-        'user_id',
-        'nome_cliente',
-        'email',
-        'data_inicio',
-        'data_fim',
-    ];
+    'bem_locavel_id', 'nome_cliente', 'email', 'data_inicio', 'data_fim',
+    'user_id', 'payment_method', 'payment_status', 'atm_reference'
+];
+
 
     public function carro()
     {

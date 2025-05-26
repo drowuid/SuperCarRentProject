@@ -12,21 +12,26 @@ class ReservaController extends Controller
      * Store a new reservation.
      */
     public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'bem_locavel_id' => 'required|exists:bens_locaveis,id',
-            'nome_cliente'   => 'required|string|max:255',
-            'email'          => 'required|email',
-            'data_inicio'    => 'required|date|after_or_equal:today',
-            'data_fim'       => 'required|date|after:data_inicio',
-        ]);
+{
+    $validated = $request->validate([
+        'bem_locavel_id' => 'required|exists:bens_locaveis,id',
+        'nome_cliente'   => 'required|string|max:255',
+        'email'          => 'required|email',
+        'data_inicio'    => 'required|date|after_or_equal:today',
+        'data_fim'       => 'required|date|after:data_inicio',
+        'payment_method' => 'required|in:paypal,atm', // ✅ New validation
+    ]);
 
-        $validated['user_id'] = Auth::id();
+    $validated['user_id'] = Auth::id();
 
-        Reserva::create($validated);
+    // ✅ Set initial payment status
+    $validated['payment_status'] = $validated['payment_method'] === 'atm' ? 'pending' : 'paid';
 
-        return back()->with('success', 'Reserva efetuada com sucesso!');
-    }
+    Reserva::create($validated);
+
+    return back()->with('success', 'Reserva efetuada com sucesso!');
+}
+
 
     /**
      * Show all reservations of the authenticated user.
@@ -91,4 +96,25 @@ class ReservaController extends Controller
 
         return redirect()->route('reservas.minhas')->with('success', 'Reserva cancelada.');
     }
+
+    public function storePaypal(Request $request)
+{
+    $data = $request->validate([
+        'bem_locavel_id' => 'required|exists:bens_locaveis,id',
+        'nome_cliente'   => 'required|string|max:255',
+        'email'          => 'required|email',
+        'data_inicio'    => 'required|date|after_or_equal:today',
+        'data_fim'       => 'required|date|after:data_inicio',
+    ]);
+
+    $data['user_id'] = Auth::id();
+    $data['payment_method'] = 'paypal';
+    $data['payment_status'] = 'paid';
+    $data['atm_reference'] = null;
+
+    Reserva::create($data);
+
+    return response()->json(['success' => true]);
+}
+
 }

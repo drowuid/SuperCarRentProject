@@ -6,6 +6,7 @@ use App\Http\Controllers\BemLocavelController;
 use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservationConfirmationMailController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PayPalController;
 
 Route::get('/', [BemLocavelController::class, 'index'])->name('home');
 
@@ -37,6 +38,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/carro/{id}', [BemLocavelController::class, 'show']);
     Route::get('/cars/{id}', [CarController::class, 'show']);
+
+    Route::post('/paypal/pay', [PayPalController::class, 'payWithPayPal'])->name('paypal.pay');
+Route::get('/paypal/status', [PayPalController::class, 'paymentStatus'])->name('paypal.status');
+Route::get('/paypal/cancel', [PayPalController::class, 'paymentCancel'])->name('paypal.cancel');
+Route::post('/reserva/paypal', [ReservaController::class, 'storePaypal'])->name('reserva.paypal');
 
 
 });

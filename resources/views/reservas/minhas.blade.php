@@ -92,6 +92,17 @@
                                             {{ \Carbon\Carbon::parse($reserva->data_fim)->format('d/m/Y') }}
                                         </p>
                                         <p class="mb-1"><strong>Preço diário:</strong> €{{ $carro->preco_diario }}</p>
+                                        @php
+    $start = \Carbon\Carbon::parse($reserva->data_inicio);
+    $end = \Carbon\Carbon::parse($reserva->data_fim);
+    $days = $start->diffInDays($end);
+    $total = $days * $carro->preco_diario;
+@endphp
+
+<p class="mb-1">
+    <strong>Total pago:</strong> €{{ number_format($total, 2, ',', '.') }} ({{ $days }} dias x €{{ number_format($carro->preco_diario, 2, ',', '.') }})
+</p>
+
                                         <p class="mb-2"><strong>Localizações:</strong><br>
                                             @foreach($carro->localizacoes as $loc)
                                                 <span class="badge bg-secondary">{{ $loc->cidade }}</span>

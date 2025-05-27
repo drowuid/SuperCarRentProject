@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reserva;
+use App\Models\BemLocavel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,36 +13,36 @@ class ReservaController extends Controller
      * Store a new reservation.
      */
     public function store(Request $request)
-{
-    $validated = $request->validate([
-        'bem_locavel_id' => 'required|exists:bens_locaveis,id',
-        'nome_cliente'   => 'required|string|max:255',
-        'email'          => 'required|email',
-        'data_inicio'    => 'required|date|after_or_equal:today',
-        'data_fim'       => 'required|date|after:data_inicio',
-        'payment_method' => 'required|in:paypal,atm', // ✅ New validation
-    ]);
+    {
+        $validated = $request->validate([
+            'bem_locavel_id' => 'required|exists:bens_locaveis,id',
+            'nome_cliente'   => 'required|string|max:255',
+            'email'          => 'required|email',
+            'data_inicio'    => 'required|date|after_or_equal:today',
+            'data_fim'       => 'required|date|after:data_inicio',
+            'payment_method' => 'required|in:paypal,atm',
+        ]);
 
-    $validated['user_id'] = Auth::id();
+        $validated['user_id'] = Auth::id();
+        $validated['payment_status'] = $validated['payment_method'] === 'atm' ? 'pending' : 'paid';
 
-    // ✅ Set initial payment status
-    $validated['payment_status'] = $validated['payment_method'] === 'atm' ? 'pending' : 'paid';
+        // Create reservation
+        Reserva::create($validated);
 
-    Reserva::create($validated);
+        // ❗ Mark car as unavailable
+        BemLocavel::where('id', $validated['bem_locavel_id'])->update(['is_available' => false]);
 
-    return back()->with('success', 'Reserva efetuada com sucesso!');
-}
-
+        return back()->with('success', 'Reserva efetuada com sucesso!');
+    }
 
     /**
      * Show all reservations of the authenticated user.
      */
     public function minhasReservas()
     {
-        $userId = Auth::id();
-
-        $reservas = Reserva::with(['carro.marca', 'carro.localizacoes'])->where('user_id', Auth::id())->get();
-
+        $reservas = Reserva::with(['carro.marca', 'carro.localizacoes'])
+            ->where('user_id', Auth::id())
+            ->get();
 
         return view('reservas.minhas', compact('reservas'));
     }
@@ -92,29 +93,39 @@ class ReservaController extends Controller
             abort(403);
         }
 
+        // ❗ Make the car available again
+        BemLocavel::where('id', $reserva->bem_locavel_id)->update(['is_available' => true]);
+
+        
+
         $reserva->delete();
 
         return redirect()->route('reservas.minhas')->with('success', 'Reserva cancelada.');
     }
 
+    /**
+     * Store reservation from PayPal callback.
+     */
     public function storePaypal(Request $request)
-{
-    $data = $request->validate([
-        'bem_locavel_id' => 'required|exists:bens_locaveis,id',
-        'nome_cliente'   => 'required|string|max:255',
-        'email'          => 'required|email',
-        'data_inicio'    => 'required|date|after_or_equal:today',
-        'data_fim'       => 'required|date|after:data_inicio',
-    ]);
+    {
+        $data = $request->validate([
+            'bem_locavel_id' => 'required|exists:bens_locaveis,id',
+            'nome_cliente'   => 'required|string|max:255',
+            'email'          => 'required|email',
+            'data_inicio'    => 'required|date|after_or_equal:today',
+            'data_fim'       => 'required|date|after:data_inicio',
+        ]);
 
-    $data['user_id'] = Auth::id();
-    $data['payment_method'] = 'paypal';
-    $data['payment_status'] = 'paid';
-    $data['atm_reference'] = null;
+        $data['user_id'] = Auth::id();
+        $data['payment_method'] = 'paypal';
+        $data['payment_status'] = 'paid';
+        $data['atm_reference'] = null;
 
-    Reserva::create($data);
+        Reserva::create($data);
 
-    return response()->json(['success' => true]);
-}
+        // ❗ Mark car as unavailable
+        BemLocavel::where('id', $data['bem_locavel_id'])->update(['is_available' => false]);
 
+        return response()->json(['success' => true]);
+    }
 }

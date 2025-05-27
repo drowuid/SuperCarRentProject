@@ -10,7 +10,9 @@ class BemLocavelController extends Controller
     public function index(Request $request)
     {
         // Start query with eager loading
-        $query = BemLocavel::with(['marca', 'localizacoes', 'caracteristicas']);
+        $query = BemLocavel::with(['marca', 'localizacoes', 'caracteristicas'])
+    ->where('is_available', true);
+
 
         // Filter by cidade (city)
         if ($request->filled('cidade')) {

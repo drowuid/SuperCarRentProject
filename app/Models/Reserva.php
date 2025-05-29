@@ -23,5 +23,11 @@ class Reserva extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    protected $casts = [
+    'data_inicio' => 'date',
+    'data_fim' => 'date',
+];
+
 }
 

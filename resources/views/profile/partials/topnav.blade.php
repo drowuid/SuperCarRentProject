@@ -13,7 +13,12 @@
             @endif
         @else
             <a href="{{ route('home') }}" class="text-white">Início</a>
-            <a href="{{ route('reservas.minhas') }}" class="text-white ms-3">Gerir Reservas</a>
+            @auth
+    @if(!Auth::user()->is_admin)
+        <a href="{{ route('reservas.minhas') }}">Gerir Reservas</a>
+    @endif
+@endauth
+
             <span class="text-white ms-3">Olá, {{ Auth::user()->name }}</span>
             <a href="{{ route('logout') }}"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
@@ -25,4 +30,10 @@
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
         @endguest
     </div>
+    @auth
+    @if(Auth::user()->is_admin)
+        <a href="{{ route('admin.dashboard') }}">Painel Admin</a>
+    @endif
+@endauth
+
 </nav>

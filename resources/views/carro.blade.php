@@ -40,7 +40,11 @@
     <span class="text-white fw-bold fs-4">{{ config('app.name') }}</span>
     <div>
         <a href="{{ route('home') }}">Início</a>
+         @auth
+    @if(!Auth::user()->is_admin)
         <a href="{{ route('reservas.minhas') }}">Gerir Reservas</a>
+    @endif
+@endauth
         @auth
             <span class="text-white ms-3">Olá, {{ Auth::user()->name }}</span>
             <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-3">Sair</a>

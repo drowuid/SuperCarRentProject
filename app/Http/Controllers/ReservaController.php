@@ -96,7 +96,7 @@ class ReservaController extends Controller
         // ❗ Make the car available again
         BemLocavel::where('id', $reserva->bem_locavel_id)->update(['is_available' => true]);
 
-        
+
 
         $reserva->delete();
 
@@ -128,4 +128,54 @@ class ReservaController extends Controller
 
         return response()->json(['success' => true]);
     }
+
+    public function adminEdit($id)
+{
+    $reserva = Reserva::with('carro')->findOrFail($id);
+    return view('admin.edit-reserva', compact('reserva'));
+}
+
+public function adminUpdate(Request $request, $id)
+{
+    $reserva = Reserva::with('carro')->findOrFail($id);
+
+    $validated = $request->validate([
+        'data_inicio' => 'required|date',
+        'data_fim' => 'required|date|after:data_inicio',
+        'payment_status' => 'required|in:pending,paid,refunded',
+        'preco_diario' => 'required|numeric|min:0',
+    ]);
+
+    // Update reserva
+    $reserva->update([
+        'data_inicio' => $validated['data_inicio'],
+        'data_fim' => $validated['data_fim'],
+        'payment_status' => $validated['payment_status'],
+    ]);
+
+    // Update the car's price
+    if ($reserva->carro) {
+        $reserva->carro->preco_diario = $validated['preco_diario'];
+        $reserva->carro->save();
+    }
+
+    return redirect()->route('admin.dashboard')->with('success', 'Reserva atualizada com sucesso.');
+}
+
+
+
+public function adminRefund($id)
+{
+    $reserva = Reserva::findOrFail($id);
+
+    if ($reserva->payment_status !== 'paid') {
+        return redirect()->back()->with('error', 'Somente reservas pagas podem ser reembolsadas.');
+    }
+
+    $reserva->update(['payment_status' => 'refunded']);
+
+    return redirect()->route('admin.dashboard')->with('success', 'Reserva reembolsada com sucesso!');
+}
+
+
 }

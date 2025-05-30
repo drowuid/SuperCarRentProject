@@ -69,7 +69,7 @@
             @if($r->payment_status === 'paid')
                 <form action="{{ route('admin.reservas.refund', $r->id) }}" method="POST" style="display:inline-block;" onsubmit="return confirm('Tem certeza que deseja reembolsar?');">
                     @csrf
-                    <button class="btn btn-sm btn-warning mt-1">Reembolsar</button>
+                    <button class="btn btn-sm" style="background-color:gold; color:black;">Reembolsar</button>
                 </form>
             @endif
         </td>

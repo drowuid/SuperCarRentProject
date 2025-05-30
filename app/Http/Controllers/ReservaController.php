@@ -39,13 +39,36 @@ class ReservaController extends Controller
      * Show all reservations of the authenticated user.
      */
     public function minhasReservas()
-    {
-        $reservas = Reserva::with(['carro.marca', 'carro.localizacoes'])
-            ->where('user_id', Auth::id())
-            ->get();
+{
+    $userId = Auth::id();
 
-        return view('reservas.minhas', compact('reservas'));
-    }
+    $reservasAtivas = Reserva::with('carro.marca', 'carro.localizacoes')
+    ->where('user_id', Auth::id())
+    ->where('payment_status', '!=', 'refunded')
+    ->get();
+
+$reservasHistorico = Reserva::with('carro.marca', 'carro.localizacoes')
+    ->where('user_id', Auth::id())
+    ->where('payment_status', 'refunded')
+    ->get();
+
+return view('reservas.minhas', compact('reservasAtivas', 'reservasHistorico'));
+
+}
+
+
+    /**Rent History for client */
+    public function historico()
+{
+    $reservas = Reserva::with('carro.marca')
+                ->where('user_id', Auth::id())
+                ->whereIn('payment_status', ['paid', 'refunded'])
+                ->latest()
+                ->get();
+
+    return view('reservas.historico', compact('reservas'));
+}
+
 
     /**
      * Show the form to edit a reservation.
@@ -86,22 +109,25 @@ class ReservaController extends Controller
      * Delete a reservation.
      */
     public function destroy($id)
-    {
-        $reserva = Reserva::findOrFail($id);
+{
+    $reserva = Reserva::with('carro')->findOrFail($id);
 
-        if ((int) $reserva->user_id !== (int) Auth::id()) {
-            abort(403);
-        }
-
-        // ❗ Make the car available again
-        BemLocavel::where('id', $reserva->bem_locavel_id)->update(['is_available' => true]);
-
-
-
-        $reserva->delete();
-
-        return redirect()->route('reservas.minhas')->with('success', 'Reserva cancelada.');
+    if ((int) $reserva->user_id !== (int) Auth::id()) {
+        abort(403);
     }
+
+    // ✅ Make car available again
+    if ($reserva->carro) {
+        $reserva->carro->is_available = true;
+        $reserva->carro->save();
+    }
+
+    $reserva->delete();
+
+    return redirect()->route('reservas.minhas')->with('success', 'Reserva cancelada.');
+}
+
+
 
     /**
      * Store reservation from PayPal callback.
@@ -143,7 +169,7 @@ public function adminUpdate(Request $request, $id)
         'data_inicio' => 'required|date',
         'data_fim' => 'required|date|after:data_inicio',
         'payment_status' => 'required|in:pending,paid,refunded',
-        'preco_diario' => 'required|numeric|min:0',
+
     ]);
 
     // Update reserva
@@ -155,7 +181,6 @@ public function adminUpdate(Request $request, $id)
 
     // Update the car's price
     if ($reserva->carro) {
-        $reserva->carro->preco_diario = $validated['preco_diario'];
         $reserva->carro->save();
     }
 
@@ -166,16 +191,27 @@ public function adminUpdate(Request $request, $id)
 
 public function adminRefund($id)
 {
-    $reserva = Reserva::findOrFail($id);
+    $reserva = Reserva::with('carro')->findOrFail($id);
 
+    // Only refund if it's paid
     if ($reserva->payment_status !== 'paid') {
-        return redirect()->back()->with('error', 'Somente reservas pagas podem ser reembolsadas.');
+        return back()->with('error', 'Reserva não está paga.');
     }
 
-    $reserva->update(['payment_status' => 'refunded']);
+    $reserva->payment_status = 'refunded';
+    $reserva->save();
 
-    return redirect()->route('admin.dashboard')->with('success', 'Reserva reembolsada com sucesso!');
+    // ✅ Make car available again
+    if ($reserva->carro) {
+        $reserva->carro->is_available = true;
+        $reserva->carro->save();
+    }
+
+    return back()->with('success', 'Reserva reembolsada com sucesso.');
 }
+
+
+
 
 
 }

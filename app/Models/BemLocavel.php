@@ -15,7 +15,7 @@ class BemLocavel extends Model
     protected $fillable = [
     'marca_id', 'modelo', 'imagem', 'registo_unico_publico', 'cor',
     'numero_passageiros', 'combustivel', 'numero_portas',
-    'transmissao', 'ano', 'manutencao', 'preco_diario', 'observacao'
+    'transmissao', 'ano', 'manutencao', 'preco_diario', 'observacao', 'is_available'
 ];
 
 

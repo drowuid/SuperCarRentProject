@@ -9,12 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
 {
     Schema::table('bens_locaveis', function (Blueprint $table) {
-        $table->boolean('is_available')->default(true)->after('observacao');
+        $table->boolean('is_available')->default(true);
     });
 }
+
 
 public function down(): void
 {

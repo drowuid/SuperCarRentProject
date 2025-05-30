@@ -44,12 +44,6 @@
                 </select>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Preço Diário</label>
-                <input type="number" step="0.01" name="preco_diario" class="form-control"
-                    value="{{ $reserva->carro->preco_diario}}" required>
-            </div>
-
             <button type="submit" class="btn" style="background-color:gold; color:black;">Salvar Alterações</button>
         </form>
 

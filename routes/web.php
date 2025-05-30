@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas'])->name('reservas.minhas');
+    Route::get('/minhas-reservas/historico', [ReservaController::class, 'historico'])->middleware('auth')->name('reservas.historico');
+
 
     // Create/store
     Route::post('/reserva', [ReservaController::class, 'store'])->name('reserva.store');

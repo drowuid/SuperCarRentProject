@@ -31,6 +31,19 @@
             background: #343a40;
             color: #ccc;
         }
+        /* Custom styles for smaller form */
+        .reservation-form-container {
+            max-width: 600px; /* Adjust this value to control form width */
+            margin: 0 auto; /* Centers the form container */
+            padding: 20px; /* Add some padding inside */
+            border-radius: 8px;
+            background-color: #fff;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        .payment-summary-card {
+            max-width: 400px; /* Adjust this value for payment summary width */
+            margin: 20px auto; /* Centers the payment summary card */
+        }
     </style>
 </head>
 <body>
@@ -40,11 +53,11 @@
     <span class="text-white fw-bold fs-4">{{ config('app.name') }}</span>
     <div>
         <a href="{{ route('home') }}">Início</a>
-         @auth
-    @if(!Auth::user()->is_admin)
-        <a href="{{ route('reservas.minhas') }}">Gerir Reservas</a>
-    @endif
-@endauth
+          @auth
+            @if(!Auth::user()->is_admin)
+                <a href="{{ route('reservas.minhas') }}">Gerir Reservas</a>
+            @endif
+        @endauth
         @auth
             <span class="text-white ms-3">Olá, {{ Auth::user()->name }}</span>
             <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="ms-3">Sair</a>
@@ -91,17 +104,19 @@
     </div>
 </div>
 
+---
+
 {{-- 📝 Reservation Form Section --}}
 <div id="reserva" class="container my-5">
-    <h3>Formulário de Reserva</h3>
+    <h3 class="text-center mb-4">Formulário de Reserva</h3>
 
     @if(session('success'))
-        <div class="alert alert-success">{{ session('success') }}</div>
+        <div class="alert alert-success text-center">{{ session('success') }}</div>
     @endif
 
     @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
+        <div class="alert alert-danger text-center">
+            <ul class="mb-0 list-unstyled">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
@@ -109,72 +124,80 @@
         </div>
     @endif
 
-    <form id="reserva-form" action="{{ route('reserva.store') }}" method="POST">
-        @csrf
-        <input type="hidden" name="bem_locavel_id" value="{{ $carro->id }}">
+    <div class="reservation-form-container">
+        <form id="reserva-form" action="{{ route('reserva.store') }}" method="POST">
+            @csrf
+            <input type="hidden" name="bem_locavel_id" value="{{ $carro->id }}">
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="nome_cliente" class="form-label">Nome</label>
-                <input type="text" name="nome_cliente" class="form-control" value="{{ auth()->user()->name ?? old('nome_cliente') }}" required>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="nome_cliente" class="form-label">Nome</label>
+                    <input type="text" name="nome_cliente" class="form-control" value="{{ auth()->user()->name ?? old('nome_cliente') }}" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">E-mail</label>
+                    <input type="email" name="email" class="form-control" value="{{ auth()->user()->email ?? old('email') }}" required>
+                </div>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="email" class="form-label">E-mail</label>
-                <input type="email" name="email" class="form-control" value="{{ auth()->user()->email ?? old('email') }}" required>
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="data_inicio" class="form-label">Data de Início</label>
+                    <input type="date" name="data_inicio" class="form-control" value="{{ old('data_inicio') }}" required onchange="updatePaymentSummary()">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="data_fim" class="form-label">Data de Fim</label>
+                    <input type="date" name="data_fim" class="form-control" value="{{ old('data_fim') }}" required onchange="updatePaymentSummary()">
+                </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="data_inicio" class="form-label">Data de Início</label>
-                <input type="date" name="data_inicio" class="form-control" value="{{ old('data_inicio') }}" required onchange="updatePaymentSummary()">
+            <div class="mb-3">
+                <label for="payment_method" class="form-label">Método de Pagamento</label>
+                <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePayment(this.value); updatePaymentSummary();">
+                    <option value="">Escolha um método</option>
+                    <option value="paypal">PayPal</option>
+                </select>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="data_fim" class="form-label">Data de Fim</label>
-                <input type="date" name="data_fim" class="form-control" value="{{ old('data_fim') }}" required onchange="updatePaymentSummary()">
+
+            {{-- 🔍 Payment Summary --}}
+            {{-- This div is now outside the row to allow for centering and specific sizing --}}
+            <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
+
+
+            <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary btn-sm" id="submit-button">Confirmar Reserva</button>
             </div>
-        </div>
-
-        {{-- 🔍 Payment Summary --}}
-        <div id="payment-summary" style="display:none;" class="mb-3"></div>
-
-        <div class="mb-3">
-            <label for="payment_method" class="form-label">Método de Pagamento</label>
-            <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePayment(this.value); updatePaymentSummary();">
-                <option value="">Escolha um método</option>
-                <option value="paypal">PayPal</option>
-                <option value="atm">Referência Multibanco</option>
-            </select>
-        </div>
-
-        <div id="paypal-button-container" style="display: none;"></div>
-
-        <button type="submit" class="btn btn-primary" id="submit-button">Confirmar Reserva</button>
-    </form>
+        </form>
+    </div>
 </div>
 
-{{-- 📌 Footer --}}
-<footer class="text-center py-4">
-    &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
-</footer>
+---
 
 {{-- PayPal SDK --}}
 <script src="https://www.paypal.com/sdk/js?client-id=AVUx1ZUO5ji16WxPheuUr_C2qbWxEsVtDYwO6O0vIWD9xw2n9rcA-YPIDq7f6De6p9rSvc-jX-3b3hye&currency=EUR"></script>
 <script>
     function togglePayment(method) {
+        const submitButton = document.getElementById('submit-button');
+        const paypalButtonContainer = document.getElementById('paypal-button-container');
+
         if (method === 'paypal') {
-            document.getElementById('submit-button').style.display = 'none';
-            document.getElementById('paypal-button-container').style.display = 'block';
+            submitButton.style.display = 'none';
+            paypalButtonContainer.style.display = 'block';
         } else {
-            document.getElementById('submit-button').style.display = 'inline-block';
-            document.getElementById('paypal-button-container').style.display = 'none';
+            submitButton.style.display = 'inline-block';
+            paypalButtonContainer.style.display = 'none';
         }
     }
 
     function updatePaymentSummary() {
-        const start = new Date(document.querySelector('input[name="data_inicio"]').value);
-        const end = new Date(document.querySelector('input[name="data_fim"]').value);
+        const startInput = document.querySelector('input[name="data_inicio"]');
+        const endInput = document.querySelector('input[name="data_fim"]');
         const summary = document.getElementById('payment-summary');
+
+        const start = new Date(startInput.value);
+        const end = new Date(endInput.value);
 
         if (!isNaN(start) && !isNaN(end) && end > start) {
             const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
@@ -182,12 +205,11 @@
             const total = (days * dailyRate).toFixed(2);
 
             summary.innerHTML = `
-                <div class="alert alert-info">
-                    <strong>Resumo do Pagamento:</strong><br>
-                    Duração: ${days} dia(s)<br>
-                    Preço por dia: €${dailyRate}<br>
-                    <strong>Total a pagar: €${total}</strong>
-                </div>
+                <h6 class="card-title text-center">Resumo do Pagamento</h6>
+                <p class="card-text mb-1">Duração: <strong>${days} dia(s)</strong></p>
+                <p class="card-text mb-1">Preço por dia: <strong>€${dailyRate}</strong></p>
+                <hr class="my-2">
+                <p class="card-text fs-5 text-success text-center">Total a pagar: <strong>€${total}</strong></p>
             `;
             summary.style.display = 'block';
         } else {
@@ -196,11 +218,19 @@
         }
     }
 
+    // Initialize PayPal buttons only if it's the selected method initially
+    // Or, call this inside togglePayment('paypal') if paypal is chosen
     paypal.Buttons({
         createOrder: function (data, actions) {
+            const start = new Date(document.querySelector('input[name="data_inicio"]').value);
+            const end = new Date(document.querySelector('input[name="data_fim"]').value);
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            const dailyRate = parseFloat({{ $carro->preco_diario }});
+            const totalAmount = (days * dailyRate).toFixed(2);
+
             return actions.order.create({
                 purchase_units: [{
-                    amount: { value: '{{ $carro->preco_diario }}' }
+                    amount: { value: totalAmount }
                 }]
             });
         },
@@ -214,20 +244,39 @@
                     },
                     body: JSON.stringify({
                         bem_locavel_id: '{{ $carro->id }}',
-                        nome_cliente: '{{ auth()->user()->name }}',
-                        email: '{{ auth()->user()->email }}',
+                        nome_cliente: '{{ auth()->user()->name ?? '' }}', // Ensure these are properly handled if user is not logged in
+                        email: '{{ auth()->user()->email ?? '' }}',
                         data_inicio: document.querySelector('input[name="data_inicio"]').value,
                         data_fim: document.querySelector('input[name="data_fim"]').value,
                         payment_method: 'paypal'
                     })
                 }).then(res => res.json()).then(data => {
-                    alert('Reserva efetuada com sucesso via PayPal!');
-                    window.location.href = "{{ route('reservas.minhas') }}";
+                    if (data.success) {
+                        alert('Reserva efetuada com sucesso via PayPal!');
+                        window.location.href = "{{ route('reservas.minhas') }}";
+                    } else {
+                        alert('Erro ao processar a reserva: ' + data.message);
+                    }
+                }).catch(error => {
+                    console.error('Error during PayPal callback:', error);
+                    alert('Ocorreu um erro ao finalizar a reserva. Por favor, tente novamente.');
                 });
             });
+        },
+        onError: function (err) {
+            console.error('PayPal error:', err);
+            alert('Ocorreu um erro com o pagamento PayPal. Por favor, tente novamente.');
         }
     }).render('#paypal-button-container');
+
+    // Call updatePaymentSummary on page load if dates are already filled (e.g., from old input)
+    document.addEventListener('DOMContentLoaded', updatePaymentSummary);
 </script>
+
+{{-- 📌 Footer --}}
+<footer class="text-center py-4">
+    &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
+</footer>
 
 </body>
 </html>

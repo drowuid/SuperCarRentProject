@@ -83,8 +83,9 @@
                 <input type="text" name="phone" class="form-control" value="{{ old('phone', Auth::user()->phone ?? '') }}">
             </div>
 
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+            {{-- Removed d-grid and added btn-sm --}}
+            <div class="text-center"> {{-- Added text-center to center the button --}}
+                <button type="submit" class="btn btn-primary **btn-sm**">Salvar Alterações</button>
             </div>
         </form>
 
@@ -93,7 +94,13 @@
         {{-- 🔐 Change Password --}}
         <h5 class="mb-3">Alterar Senha</h5>
         <form method="POST" action="{{ route('password.update') }}">
-            @csrf
+    @csrf
+    @method('PUT') {{-- ✅ Add this --}}
+    @if(session('status') === 'password-updated')
+    <div class="alert alert-success">Senha alterada com sucesso!</div>
+@endif
+
+
 
             <div class="mb-3">
                 <label class="form-label">Senha Atual</label>
@@ -110,8 +117,9 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
-            <div class="d-grid">
-                <button class="btn btn-warning">Atualizar Senha</button>
+            {{-- Removed d-grid and added btn-sm --}}
+            <div class="text-center"> {{-- Added text-center to center the button --}}
+                <button class="btn btn-warning **btn-sm**">Atualizar Senha</button>
             </div>
         </form>
 
@@ -123,8 +131,9 @@
             @method('DELETE')
             <label class="form-label">Senha para confirmar exclusão</label>
             <input type="password" name="password" class="form-control mb-3" required>
-            <div class="d-grid">
-                <button class="btn btn-danger">Excluir Conta</button>
+            {{-- Removed d-grid and added btn-sm --}}
+            <div class="text-center"> {{-- Added text-center to center the button --}}
+                <button class="btn btn-danger **btn-sm**">Excluir Conta</button>
             </div>
         </form>
     </div>

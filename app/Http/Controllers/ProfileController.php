@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -87,4 +88,19 @@ public function update(ProfileUpdateRequest $request): RedirectResponse
 
     return redirect()->route('profile.edit')->with('status', 'profile-updated');
 }
+
+public function updatePassword(Request $request)
+{
+    $request->validate([
+        'current_password' => ['required', 'current_password'],
+        'password' => ['required', 'confirmed', 'min:8'],
+    ]);
+
+    $request->user()->update([
+        'password' => Hash::make($request->password),
+    ]);
+
+    return back()->with('status', 'password-updated');
+}
+
 }

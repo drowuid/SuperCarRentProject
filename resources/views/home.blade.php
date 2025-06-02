@@ -73,17 +73,30 @@
             <h2 class="mb-4 text-center">Carros Disponíveis</h2>
 
             {{-- Filter Form --}}
-            <form method="GET" action="{{ route('home') }}" class="row g-3 mb-5">
-                <div class="col-md-5">
-                    <input type="text" name="cidade" value="{{ request('cidade') }}" class="form-control" placeholder="Filtrar por cidade">
-                </div>
-                <div class="col-md-5">
-                    <input type="text" name="marca" value="{{ request('marca') }}" class="form-control" placeholder="Filtrar por marca">
-                </div>
-                <div class="col-md-2">
-                    <button type="submit" class="btn btn-primary w-100">Filtrar</button>
-                </div>
-            </form>
+            <form method="GET" action="{{ route('home') }}" class="row g-3 mb-4">
+    {{-- Existing city and brand filters --}}
+    <div class="col-md-3">
+        <input type="text" name="cidade" value="{{ request('cidade') }}" class="form-control" placeholder="Filtrar por cidade">
+    </div>
+    <div class="col-md-3">
+        <input type="text" name="marca" value="{{ request('marca') }}" class="form-control" placeholder="Filtrar por marca">
+    </div>
+
+    {{-- 💰 Price Range Sliders --}}
+    <div class="col-md-3">
+        <label for="price-min" class="form-label">Preço Mínimo (€): <span id="minDisplay">{{ request('price_min', 0) }}</span></label>
+        <input type="range" class="form-range" min="0" max="1000" step="10" id="price-min" name="price_min" value="{{ request('price_min', 0) }}">
+    </div>
+    <div class="col-md-3">
+        <label for="price-max" class="form-label">Preço Máximo (€): <span id="maxDisplay">{{ request('price_max', 1000) }}</span></label>
+        <input type="range" class="form-range" min="0" max="1000" step="10" id="price-max" name="price_max" value="{{ request('price_max', 1000) }}">
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary w-100 mt-4">Filtrar</button>
+    </div>
+</form>
+
 
             <div class="row">
                 @foreach($carros as $carro)
@@ -168,6 +181,23 @@
             </div>
         </div>
     </footer>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const priceMin = document.getElementById('price_min');
+        const priceMax = document.getElementById('price_max');
+        const minDisplay = document.getElementById('minDisplay');
+        const maxDisplay = document.getElementById('maxDisplay');
+
+        priceMin.addEventListener('input', () => {
+            minDisplay.textContent = priceMin.value;
+        });
+
+        priceMax.addEventListener('input', () => {
+            maxDisplay.textContent = priceMax.value;
+        });
+    });
+</script>
 
 </body>
 </html>

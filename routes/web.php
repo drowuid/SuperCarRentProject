@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use App\Models\Reserva;
 
+
 Route::get('/', [BemLocavelController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {

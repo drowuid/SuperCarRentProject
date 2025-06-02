@@ -19,7 +19,8 @@
     @endif
 @endauth
 
-            <span class="text-white ms-3">Olá, {{ Auth::user()->name }}</span>
+            <a href="{{ route('profile.edit') }}" class="text-white ms-3">Olá, {{ Auth::user()->name }}</a>
+
             <a href="{{ route('logout') }}"
                onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
                class="text-white ms-3"

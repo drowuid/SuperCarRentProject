@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use App\Models\Reserva;
-
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Hash;
 
 Route::get('/', [BemLocavelController::class, 'index'])->name('home');
 
@@ -20,13 +21,18 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // ✅ User profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas'])->name('reservas.minhas');
-    Route::get('/minhas-reservas/historico', [ReservaController::class, 'historico'])->middleware('auth')->name('reservas.historico');
+    // ✅ Custom routes for updating password and uploading photo
+    Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
+    Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])->name('profile.uploadPhoto');
 
+
+    Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas'])->name('reservas.minhas');
+    Route::get('/minhas-reservas/historico', [ReservaController::class, 'historico'])->name('reservas.historico');
 
     // Create/store
     Route::post('/reserva', [ReservaController::class, 'store'])->name('reserva.store');
@@ -51,21 +57,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/paypal/cancel', [PayPalController::class, 'paymentCancel'])->name('paypal.cancel');
     Route::post('/reserva/paypal', [ReservaController::class, 'storePaypal'])->name('reserva.paypal');
 
-    // Admin routes
-    Route::middleware(['auth', 'admin'])->group(function () {
+    // ✅ Admin-only routes
+    Route::middleware(['admin'])->group(function () {
 
-    // Admin dashboard
-    Route::get('/admin/dashboard', function () {
-        $reservas = Reserva::with(['carro.marca'])->latest()->get();
-        return view('admin.dashboard', compact('reservas'));
-    })->name('admin.dashboard');
+        Route::get('/admin/dashboard', function () {
+            $reservas = Reserva::with(['carro.marca'])->latest()->get();
+            return view('admin.dashboard', compact('reservas'));
+        })->name('admin.dashboard');
 
-    // Admin can edit reservations
-    Route::get('/admin/reservas/{id}/edit', [ReservaController::class, 'adminEdit'])->name('admin.reservas.edit');
-    Route::put('/admin/reservas/{id}', [ReservaController::class, 'adminUpdate'])->name('admin.reservas.update');
-    Route::post('/admin/reservas/{id}/refund', [ReservaController::class, 'adminRefund'])->name('admin.reservas.refund');
+        Route::get('/admin/reservas/{id}/edit', [ReservaController::class, 'adminEdit'])->name('admin.reservas.edit');
+        Route::put('/admin/reservas/{id}', [ReservaController::class, 'adminUpdate'])->name('admin.reservas.update');
+        Route::post('/admin/reservas/{id}/refund', [ReservaController::class, 'adminRefund'])->name('admin.reservas.refund');
+    });
 });
-
-}); // <-- Close the 'auth' middleware group
 
 require __DIR__.'/auth.php';

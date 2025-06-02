@@ -73,29 +73,35 @@
             <h2 class="mb-4 text-center">Carros Disponíveis</h2>
 
             {{-- Filter Form --}}
-            <form method="GET" action="{{ route('home') }}" class="row g-3 mb-4">
-    {{-- Existing city and brand filters --}}
-    <div class="col-md-3">
-        <input type="text" name="cidade" value="{{ request('cidade') }}" class="form-control" placeholder="Filtrar por cidade">
-    </div>
-    <div class="col-md-3">
-        <input type="text" name="marca" value="{{ request('marca') }}" class="form-control" placeholder="Filtrar por marca">
+<form method="GET" action="{{ route('home') }}" class="mb-4">
+    <div class="row justify-content-center g-3 mb-3">
+        {{-- City Filter --}}
+        <div class="col-md-4 col-sm-6">
+            <input type="text" name="cidade" value="{{ request('cidade') }}" class="form-control" placeholder="Filtrar por cidade">
+        </div>
+
+        {{-- Brand Filter --}}
+        <div class="col-md-4 col-sm-6">
+            <input type="text" name="marca" value="{{ request('marca') }}" class="form-control" placeholder="Filtrar por marca">
+        </div>
     </div>
 
-    {{-- 💰 Price Range Sliders --}}
-    <div class="col-md-3">
-        <label for="price-min" class="form-label">Preço Mínimo (€): <span id="minDisplay">{{ request('price_min', 0) }}</span></label>
-        <input type="range" class="form-range" min="0" max="1000" step="10" id="price-min" name="price_min" value="{{ request('price_min', 0) }}">
-    </div>
-    <div class="col-md-3">
-        <label for="price-max" class="form-label">Preço Máximo (€): <span id="maxDisplay">{{ request('price_max', 1000) }}</span></label>
-        <input type="range" class="form-range" min="0" max="1000" step="10" id="price-max" name="price_max" value="{{ request('price_max', 1000) }}">
+    {{-- 💰 Single Price Range Slider --}}
+    <div class="row justify-content-center g-3 mb-3 text-center">
+        <div class="col-md-6 col-sm-8">
+            <label for="price_max" class="form-label">Preço Máximo (€): <span id="priceDisplay">{{ request('price_max', 500) }}</span></label>
+            <input type="range" class="form-range" min="0" max="500" step="10" id="price_max" name="price_max" value="{{ request('price_max', 500) }}">
+        </div>
     </div>
 
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary w-100 mt-4">Filtrar</button>
+    <div class="row justify-content-center">
+        <div class="col-md-2">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
     </div>
 </form>
+
+
 
 
             <div class="row">
@@ -183,21 +189,15 @@
     </footer>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const priceMin = document.getElementById('price_min');
-        const priceMax = document.getElementById('price_max');
-        const minDisplay = document.getElementById('minDisplay');
-        const maxDisplay = document.getElementById('maxDisplay');
+    const priceMaxInput = document.getElementById('price_max');
+    const priceDisplay = document.getElementById('priceDisplay');
 
-        priceMin.addEventListener('input', () => {
-            minDisplay.textContent = priceMin.value;
-        });
-
-        priceMax.addEventListener('input', () => {
-            maxDisplay.textContent = priceMax.value;
-        });
+    priceMaxInput.addEventListener('input', () => {
+        priceDisplay.textContent = priceMaxInput.value;
     });
 </script>
+
+
 
 </body>
 </html>

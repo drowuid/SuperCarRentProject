@@ -22,40 +22,27 @@ class ProfileController extends Controller
         ]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        $user = $request->user();
-        $data = $request->validated();
 
-        // ✅ Handle profile picture upload
-        if ($request->hasFile('profile_picture')) {
-            // Delete old picture if exists
-            if ($user->profile_picture) {
-                Storage::disk('public')->delete($user->profile_picture);
-            }
+public function update(ProfileUpdateRequest $request): RedirectResponse
+{
+    $user = $request->user();
 
-            $path = $request->file('profile_picture')->store('profile_pictures', 'public');
-            $user->profile_picture = $path;
-        }
+    $user->fill($request->validated());
 
-        // ✅ Handle phone update (if in form)
-        if ($request->filled('phone')) {
-            $user->phone = $request->input('phone');
-        }
-
-        $user->fill($data);
-
-        if ($user->isDirty('email')) {
-            $user->email_verified_at = null;
-        }
-
-        $user->save();
-
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    if ($request->hasFile('profile_photo')) {
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $user->profile_photo_path = $path;
     }
+
+    if ($user->isDirty('email')) {
+        $user->email_verified_at = null;
+    }
+
+    $user->save();
+
+    return Redirect::route('profile.edit')->with('status', 'profile-updated');
+}
+
 
     /**
      * Delete the user's account.
@@ -77,4 +64,27 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
+
+    public function uploadPhoto(Request $request)
+{
+    $request->validate([
+        'profile_photo' => 'required|image|max:2048', // 2MB max
+    ]);
+
+    $user = $request->user();
+
+    // Store the image
+    $path = $request->file('profile_photo')->store('profile_photos', 'public');
+
+    // Delete old photo if exists
+    if ($user->profile_photo && Storage::disk('public')->exists('profile_photos/' . $user->profile_photo)) {
+        Storage::disk('public')->delete('profile_photos/' . $user->profile_photo);
+    }
+
+    // Update user profile
+    $user->profile_photo = basename($path);
+    $user->save();
+
+    return redirect()->route('profile.edit')->with('status', 'profile-updated');
+}
 }

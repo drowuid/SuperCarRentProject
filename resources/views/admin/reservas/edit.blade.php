@@ -1,6 +1,10 @@
 @extends('layouts.app')
 
 @section('content')
+<head>
+    <meta charset="UTF-8">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
     <div class="container py-5">
         <h2>Editar Reserva de {{ $reserva->nome_cliente }}</h2>
 
@@ -58,4 +62,6 @@
     </div>
 @endsection
 
-@include('layouts.footer')
+<footer class="fixed bottom-0 left-0 w-full text-center py-4 bg-dark-custom text-white">
+        &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
+    </footer>

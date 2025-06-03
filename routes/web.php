@@ -7,6 +7,7 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservationConfirmationMailController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\AdminController;
+use App\Http\Middleware\UserMiddleware;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
@@ -14,17 +15,19 @@ use App\Models\Reserva;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Hash;
 
+
 Route::get('/', [BemLocavelController::class, 'index'])->name('home');
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', UserMiddleware::class])->group(function () {
     // ✅ User profile routes
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 
     // ✅ Custom routes for updating password and uploading photo
     Route::put('/user/password', [ProfileController::class, 'updatePassword'])->name('password.update');
@@ -70,6 +73,5 @@ Route::middleware('auth')->group(function () {
         Route::put('/admin/reservas/{id}', [ReservaController::class, 'adminUpdate'])->name('admin.reservas.update');
         Route::post('/admin/reservas/{id}/refund', [ReservaController::class, 'adminRefund'])->name('admin.reservas.refund');
     });
-});
 
 require __DIR__.'/auth.php';

@@ -11,6 +11,15 @@
             background: #343a40;
             padding: 10px 20px;
         }
+        .top-nav a {
+            color: white;
+            margin-left: 15px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
 
         .card-img-left {
             height: 100%;
@@ -37,7 +46,7 @@
             @else
                 <a href="{{ route('home') }}" class="text-white">Início</a>
                 <a href="{{ route('reservas.minhas') }}" class="text-white ms-3">Gerir Reservas</a>
-                <span class="text-white ms-3">Olá, {{ Auth::user()->name }}</span>
+                <a href="{{ route('profile.edit') }}" class="text-white ms-3">Olá, {{ Auth::user()->name }}</a>
                 <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();" class="text-white ms-3">Sair</a>
                 <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">@csrf</form>
             @endguest

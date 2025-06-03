@@ -38,7 +38,7 @@
 
 {{-- 🔝 Top Navbar --}}
 <nav class="top-nav d-flex justify-content-between align-items-center px-3">
-    <span class="text-white fw-bold fs-4">{{ config('app.name') }}</span>
+        <span class="text-white fw-bold fs-4">{{ config('app.name') }}</span>
     <div>
         <a href="{{ route('home') }}">Início</a>
         <a href="{{ route('reservas.minhas') }}">Gerir Reservas</a>
@@ -130,7 +130,7 @@
             <label class="form-label">Senha para confirmar exclusão</label>
             <input type="password" name="password" class="form-control mb-3" required>
 
-            <div class="text-center"> 
+            <div class="text-center">
                 <button class="btn btn-danger **btn-sm**">Excluir Conta</button>
             </div>
         </form>

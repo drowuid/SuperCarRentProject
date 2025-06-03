@@ -4,11 +4,27 @@
     <meta charset="UTF-8">
     <title>Painel de Administração - SuperCarRent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <style>
-        body { background-color: #f8f9fa; }
-        .top-nav { background: #343a40; padding: 10px 20px; color: white; }
-        .top-nav a { color: white; margin-left: 15px; text-decoration: none; font-weight: 500; }
-        .top-nav a:hover { text-decoration: underline; }
+        body {
+            background-color: #f8f9fa;
+            /* Ensure body is a flex container for the sticky footer if you decide to change to that later */
+            /* For fixed footer, padding-bottom will be handled by JS */
+        }
+        .top-nav {
+            background: #343a40;
+            padding: 10px 20px;
+            color: white;
+        }
+        .top-nav a {
+            color: white;
+            margin-left: 15px;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .top-nav a:hover {
+            text-decoration: underline;
+        }
 
         /* Custom styles for the admin content card */
         .admin-content-card {
@@ -32,6 +48,11 @@
         .status-pending { background-color: #ffc107; color: #343a40; } /* Yellow for pending (with dark text) */
         .status-refunded { background-color: #dc3545; } /* Red for refunded */
         .status-default { background-color: #6c757d; } /* Grey for other/default status */
+
+        /* Custom class for footer background - replaces direct bg-dark if needed */
+        .bg-dark-custom {
+            background-color: #343a40;
+        }
     </style>
 </head>
 <body>
@@ -139,9 +160,23 @@
         </div> {{-- End .admin-content-card --}}
     </div> {{-- End .container --}}
 
+    <footer class="fixed bottom-0 left-0 w-full text-center py-4 bg-dark-custom text-white">
+        &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
+    </footer>
+
     {{-- Bootstrap Bundle with Popper --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const footer = document.querySelector('footer');
+            if (footer) {
+                const footerHeight = footer.offsetHeight;
+                // Add padding-bottom to the body to ensure content is not hidden by the fixed footer
+                document.body.style.paddingBottom = footerHeight + 'px';
+            }
+        });
+    </script>
+
 </body>
-@include('layouts.footer')
 </html>

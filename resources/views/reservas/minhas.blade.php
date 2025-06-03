@@ -54,12 +54,20 @@
         <div class="tab-content mt-4">
             {{-- Ativas --}}
             <div class="tab-pane fade show active" id="ativas" role="tabpanel">
-                @include('reservas.partials.lista', ['reservas' => $reservasAtivas])
+                @isset($reservasAtivas)
+                    @include('reservas.partials.lista', ['reservas' => $reservasAtivas])
+                @else
+                    <div class="alert alert-warning">Nenhuma reserva ativa encontrada.</div>
+                @endisset
             </div>
 
             {{-- Histórico --}}
             <div class="tab-pane fade" id="historico" role="tabpanel">
-                @include('reservas.partials.lista', ['reservas' => $reservasHistorico])
+                @isset($reservasHistorico)
+                    @include('reservas.partials.lista', ['reservas' => $reservasHistorico])
+                @else
+                    <div class="alert alert-warning">Nenhum histórico de reservas encontrado.</div>
+                @endisset
             </div>
         </div>
     </div>

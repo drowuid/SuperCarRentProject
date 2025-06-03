@@ -6,34 +6,47 @@ use App\Models\Reserva;
 use App\Models\BemLocavel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class ReservaController extends Controller
 {
     /**
      * Store a new reservation.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'bem_locavel_id' => 'required|exists:bens_locaveis,id',
-            'nome_cliente'   => 'required|string|max:255',
-            'email'          => 'required|email',
-            'data_inicio'    => 'required|date|after_or_equal:today',
-            'data_fim'       => 'required|date|after:data_inicio',
-            'payment_method' => 'required|in:paypal,atm',
-        ]);
 
-        $validated['user_id'] = Auth::id();
-        $validated['payment_status'] = $validated['payment_method'] === 'atm' ? 'pending' : 'paid';
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'bem_locavel_id' => 'required|exists:bens_locaveis,id',
+        'nome_cliente'   => 'required|string|max:255',
+        'email'          => 'required|email',
+        'data_inicio'    => 'required|date|after_or_equal:today',
+        'data_fim'       => 'required|date|after:data_inicio',
+        'payment_method' => 'required|in:paypal,atm,referencia',
+    ]);
 
-        // Create reservation
-        Reserva::create($validated);
+    $validated['user_id'] = Auth::id();
+    $validated['payment_status'] = in_array($validated['payment_method'], ['paypal']) ? 'paid' : 'pending';
 
-        // ❗ Mark car as unavailable
-        BemLocavel::where('id', $validated['bem_locavel_id'])->update(['is_available' => false]);
+    // Generate fake entidade & referencia if method is referencia
+    if ($validated['payment_method'] === 'referencia') {
+    $validated['entidade'] = '12345'; // or random entity logic
+    $validated['referencia'] = Str::upper(Str::random(10)); // or custom generation logic
+    $validated['payment_status'] = 'pending';
+}
 
-        return back()->with('success', 'Reserva efetuada com sucesso!');
+    Reserva::create($validated);
+    // Mark car as unavailable
+    $carro = \App\Models\BemLocavel::find($validated['bem_locavel_id']);
+    if ($carro) {
+    $carro->is_available = false;
+    $carro->save();
     }
+
+
+    return back()->with('success', 'Reserva criada com sucesso! Use a referência para pagar.');
+}
+
 
     /**
      * Show all reservations of the authenticated user.

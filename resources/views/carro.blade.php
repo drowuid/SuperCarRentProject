@@ -153,17 +153,24 @@
 
             <div class="mb-3">
                 <label for="payment_method" class="form-label">Método de Pagamento</label>
-                <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePayment(this.value); updatePaymentSummary();">
+                <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePaymentMethod(this.value); updatePaymentSummary();">
                     <option value="">Escolha um método</option>
                     <option value="paypal">PayPal</option>
+                    <option value="referencia">Referência Multibanco</option>
                 </select>
             </div>
 
+            {{-- Multibanco Specific Fields --}}
+            <div id="multibanco-fields" style="display: none;">
+                <div class="mb-3 text-center"> {{-- Added text-center here for the message --}}
+                    <small class="form-text text-muted">A referência será gerada após a confirmação da reserva.</small>
+                </div>
+            </div>
+
             {{-- 🔍 Payment Summary --}}
-            {{-- This div is now outside the row to allow for centering and specific sizing --}}
             <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
 
-
+            {{-- PayPal Button Container - Centered within the form --}}
             <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
 
             <div class="text-center">
@@ -173,21 +180,41 @@
     </div>
 </div>
 
+            {{-- 🔍 Payment Summary --}}
+            <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
+
+            {{-- PayPal Button Container - Centered within the form --}}
+            <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
+        </form>
+    </div>
+</div>
+</div>
+
 ---
 
 {{-- PayPal SDK --}}
 <script src="https://www.paypal.com/sdk/js?client-id=AVUx1ZUO5ji16WxPheuUr_C2qbWxEsVtDYwO6O0vIWD9xw2n9rcA-YPIDq7f6De6p9rSvc-jX-3b3hye&currency=EUR"></script>
 <script>
-    function togglePayment(method) {
+    function togglePaymentMethod(method) {
         const submitButton = document.getElementById('submit-button');
         const paypalButtonContainer = document.getElementById('paypal-button-container');
+        const multibancoFields = document.getElementById('multibanco-fields');
+
+        // Hide all payment-specific elements first
+        submitButton.style.display = 'none';
+        paypalButtonContainer.style.display = 'none';
+        multibancoFields.style.display = 'none';
 
         if (method === 'paypal') {
-            submitButton.style.display = 'none';
             paypalButtonContainer.style.display = 'block';
+            // PayPal buttons are rendered dynamically, so the 'submit-button' is hidden
+        } else if (method === 'referencia') { // Assuming 'referencia' is for Multibanco
+            // Multibanco fields will be populated by the backend after submission
+            multibancoFields.style.display = 'block';
+            submitButton.style.display = 'inline-block'; // Show generic submit button for Multibanco
         } else {
+            // For any other method, show the generic submit button
             submitButton.style.display = 'inline-block';
-            paypalButtonContainer.style.display = 'none';
         }
     }
 
@@ -218,8 +245,6 @@
         }
     }
 
-    // Initialize PayPal buttons only if it's the selected method initially
-    // Or, call this inside togglePayment('paypal') if paypal is chosen
     paypal.Buttons({
         createOrder: function (data, actions) {
             const start = new Date(document.querySelector('input[name="data_inicio"]').value);
@@ -236,26 +261,30 @@
         },
         onApprove: function (data, actions) {
             return actions.order.capture().then(function (details) {
+                // Ensure the form data is correctly retrieved for the fetch request
+                const formData = {
+                    bem_locavel_id: '{{ $carro->id }}',
+                    nome_cliente: document.querySelector('input[name="nome_cliente"]').value, // Get dynamic value
+                    email: document.querySelector('input[name="email"]').value,               // Get dynamic value
+                    data_inicio: document.querySelector('input[name="data_inicio"]').value,
+                    data_fim: document.querySelector('input[name="data_fim"]').value,
+                    payment_method: 'paypal',
+                    paypal_order_id: details.id // Pass the PayPal Order ID to your backend
+                };
+
                 fetch("{{ route('reserva.paypal') }}", {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
-                    body: JSON.stringify({
-                        bem_locavel_id: '{{ $carro->id }}',
-                        nome_cliente: '{{ auth()->user()->name ?? '' }}', // Ensure these are properly handled if user is not logged in
-                        email: '{{ auth()->user()->email ?? '' }}',
-                        data_inicio: document.querySelector('input[name="data_inicio"]').value,
-                        data_fim: document.querySelector('input[name="data_fim"]').value,
-                        payment_method: 'paypal'
-                    })
+                    body: JSON.stringify(formData)
                 }).then(res => res.json()).then(data => {
                     if (data.success) {
                         alert('Reserva efetuada com sucesso via PayPal!');
                         window.location.href = "{{ route('reservas.minhas') }}";
                     } else {
-                        alert('Erro ao processar a reserva: ' + data.message);
+                        alert('Erro ao processar a reserva: ' + (data.message || 'Erro desconhecido.'));
                     }
                 }).catch(error => {
                     console.error('Error during PayPal callback:', error);
@@ -270,7 +299,12 @@
     }).render('#paypal-button-container');
 
     // Call updatePaymentSummary on page load if dates are already filled (e.g., from old input)
-    document.addEventListener('DOMContentLoaded', updatePaymentSummary);
+    document.addEventListener('DOMContentLoaded', () => {
+        updatePaymentSummary();
+        // Set initial state of payment method fields based on default selection or old input
+        const initialPaymentMethod = document.getElementById('payment_method').value;
+        togglePaymentMethod(initialPaymentMethod);
+    });
 </script>
 
 {{-- 📌 Footer --}}

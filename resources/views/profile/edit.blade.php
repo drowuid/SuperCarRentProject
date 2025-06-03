@@ -83,8 +83,7 @@
                 <input type="text" name="phone" class="form-control" value="{{ old('phone', Auth::user()->phone ?? '') }}">
             </div>
 
-            {{-- Removed d-grid and added btn-sm --}}
-            <div class="text-center"> {{-- Added text-center to center the button --}}
+            <div class="text-center">
                 <button type="submit" class="btn btn-primary **btn-sm**">Salvar Alterações</button>
             </div>
         </form>
@@ -95,7 +94,7 @@
         <h5 class="mb-3">Alterar Senha</h5>
         <form method="POST" action="{{ route('password.update') }}">
     @csrf
-    @method('PUT') {{-- ✅ Add this --}}
+    @method('PUT')
     @if(session('status') === 'password-updated')
     <div class="alert alert-success">Senha alterada com sucesso!</div>
 @endif
@@ -117,8 +116,7 @@
                 <input type="password" name="password_confirmation" class="form-control" required>
             </div>
 
-            {{-- Removed d-grid and added btn-sm --}}
-            <div class="text-center"> {{-- Added text-center to center the button --}}
+            <div class="text-center">
                 <button class="btn btn-warning **btn-sm**">Atualizar Senha</button>
             </div>
         </form>
@@ -131,8 +129,8 @@
             @method('DELETE')
             <label class="form-label">Senha para confirmar exclusão</label>
             <input type="password" name="password" class="form-control mb-3" required>
-            {{-- Removed d-grid and added btn-sm --}}
-            <div class="text-center"> {{-- Added text-center to center the button --}}
+
+            <div class="text-center"> 
                 <button class="btn btn-danger **btn-sm**">Excluir Conta</button>
             </div>
         </form>

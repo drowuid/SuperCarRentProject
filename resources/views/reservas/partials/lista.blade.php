@@ -31,8 +31,21 @@
                                     @endif
                                 </p>
 
+                                {{-- Display Payment Method --}}
+                                <p class="mb-1"><strong>Método:</strong> {{ ucfirst($reserva->payment_method) }}</p>
+
+                                {{-- Display Payment Reference based on method --}}
                                 @if ($reserva->payment_method === 'atm' && $reserva->atm_reference)
-                                    <p><strong>Referência Multibanco:</strong> {{ $reserva->atm_reference }}</p>
+                                    <p class="mb-1"><strong>Referência Multibanco:</strong> {{ $reserva->atm_reference }}</p>
+                                @endif
+                                @if($reserva->payment_method === 'referencia' && $reserva->entidade && $reserva->referencia)
+                                    <p class="mb-1"><strong>Entidade:</strong> {{ $reserva->entidade }}</p>
+                                    <p class="mb-1"><strong>Referência:</strong> {{ $reserva->referencia }}</p>
+                                @endif
+                                @if($reserva->payment_method === 'paypal' && $reserva->payment_reference)
+                                    <p class="mb-1"><strong>Referência PayPal:</strong> {{ $reserva->payment_reference }}</p>
+                                @elseif($reserva->payment_reference && $reserva->payment_method !== 'atm' && $reserva->payment_method !== 'referencia')
+                                    <p class="mb-1"><strong>Referência de Pagamento:</strong> {{ $reserva->payment_reference }}</p>
                                 @endif
 
                                 <p class="mb-1"><strong>Período:</strong><br>
@@ -41,7 +54,7 @@
                                     {{ \Carbon\Carbon::parse($reserva->data_fim)->format('d/m/Y') }}
                                 </p>
 
-                                <p class="mb-1"><strong>Preço diário:</strong> €{{ $carro->preco_diario }}</p>
+                                <p class="mb-1"><strong>Preço diário:</strong> €{{ number_format($carro->preco_diario, 2, ',', '.') }}</p>
 
                                 @php
                                     $start = \Carbon\Carbon::parse($reserva->data_inicio);
@@ -74,7 +87,7 @@
                                           class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-sm btn-outline-danger"
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
                                                 onclick="return confirm('Tem certeza que deseja cancelar esta reserva?')">
                                             Cancelar
                                         </button>

@@ -9,10 +9,23 @@ use App\Models\BemLocavel;
 class Reserva extends Model
 {
     protected $fillable = [
-    'bem_locavel_id', 'nome_cliente', 'email', 'data_inicio', 'data_fim',
-    'user_id', 'payment_method', 'payment_status', 'atm_reference'
-];
+        'bem_locavel_id',
+        'nome_cliente',
+        'email',
+        'data_inicio',
+        'data_fim',
+        'payment_method',
+        'payment_status',
+        'atm_reference',
+        'entidade',
+        'referencia',
+        'user_id',
+    ];
 
+    protected $casts = [
+        'data_inicio' => 'date',
+        'data_fim' => 'date',
+    ];
 
     public function carro()
     {
@@ -23,11 +36,5 @@ class Reserva extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    protected $casts = [
-    'data_inicio' => 'date',
-    'data_fim' => 'date',
-];
-
 }
 

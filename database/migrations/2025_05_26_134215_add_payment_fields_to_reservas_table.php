@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('payment_method')->nullable()->after('email'); // e.g., 'paypal' or 'atm'
             $table->string('payment_status')->default('pending')->after('payment_method'); // 'pending', 'paid'
             $table->string('atm_reference')->nullable()->after('payment_status'); // if 'atm' method is used
+            
         });
     }
 

@@ -69,7 +69,7 @@ public function update(ProfileUpdateRequest $request): RedirectResponse
     public function uploadPhoto(Request $request)
 {
     $request->validate([
-        'profile_photo' => 'required|image|max:2048', // 2MB max
+        'profile_photo' => 'required|image|max:2048',
     ]);
 
     $user = $request->user();

@@ -131,7 +131,6 @@
             </div>
 
             {{-- Pagination Links --}}
-            {{-- Check if $reservas is a paginator instance before calling links() --}}
             @if(method_exists($reservas, 'links'))
                 <div class="d-flex justify-content-center mt-4">
                     {{ $reservas->links() }}

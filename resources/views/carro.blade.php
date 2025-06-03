@@ -165,6 +165,7 @@
                 <div class="mb-3 text-center"> {{-- Added text-center here for the message --}}
                     <small class="form-text text-muted">A referência será gerada após a confirmação da reserva.</small>
                 </div>
+                <div class="mb-3 text-center"><small class="form-text text-muted">Estará disponivel em "Gerir Reservas"</small></div>
             </div>
 
             {{-- 🔍 Payment Summary --}}

@@ -7,6 +7,7 @@
     <!-- Navigation and user links on the right -->
     <div>
         @guest
+            <a href="{{ route('home') }}" class="text-white">Início</a>
             <a href="{{ route('login') }}" class="text-white">Login</a>
             @if (Route::has('register'))
                 <a href="{{ route('register') }}" class="text-white ms-3">Register</a>

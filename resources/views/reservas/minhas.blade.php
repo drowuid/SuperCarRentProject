@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Minhas Reservas</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .top-nav {
@@ -14,6 +15,10 @@
         .card-img-left {
             height: 100%;
             object-fit: cover;
+        }
+        /* Custom class for dark background if 'bg-dark' isn't working directly from Bootstrap/Tailwind */
+        .bg-dark-custom {
+            background-color: #343a40; /* Standard dark background color */
         }
     </style>
 </head>
@@ -72,10 +77,18 @@
         </div>
     </div>
 
-    <footer class="text-center py-4 bg-dark text-white">
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const footerHeight = document.querySelector('footer').offsetHeight;
+            document.body.style.paddingBottom = footerHeight + 'px';
+        });
+    </script>
+
+
+    <footer class="fixed bottom-0 left-0 w-full text-center py-4 bg-dark-custom text-white">
         &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
     </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

@@ -2,7 +2,7 @@
 <html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <title>Locação de Carros - Login</title>
+    <title>SuperCarRent - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .hero {
@@ -115,10 +115,8 @@
             </form>
         </div>
     </div>
-
     <footer class="text-center py-4 bg-dark text-white mt-auto">
-        &copy; {{ date('Y') }} Locação de Carros. Todos os direitos reservados.
+        &copy; {{ date('Y') }} SuperCarRent. Todos os direitos reservados.
     </footer>
-
 </body>
 </html>

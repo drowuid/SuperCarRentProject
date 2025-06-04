@@ -7,6 +7,7 @@ use App\Models\BemLocavel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class ReservaController extends Controller
 {
@@ -223,8 +224,21 @@ public function adminRefund($id)
     return back()->with('success', 'Reserva reembolsada com sucesso.');
 }
 
+public function downloadFatura($id)
+{
+    $reserva = Reserva::with(['carro.marca', 'carro.localizacoes'])->findOrFail($id);
 
+    // Ensure the user is the owner
+    if ((int) $reserva->user_id !== (int) Auth::id()) {
+        abort(403, 'Você não tem permissão para acessar esta fatura.');
+    }
 
+    $pdf = Pdf::loadView('pdf.fatura', compact('reserva'));
+
+    $filename = 'fatura_reserva_' . $reserva->id . '.pdf';
+
+    return $pdf->download($filename);
+}
 
 
 }

@@ -27,6 +27,8 @@ Route::middleware(['auth', UserMiddleware::class])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    //Fatura
+    Route::get('/reservas/{id}/fatura', [ReservaController::class, 'downloadFatura'])->name('reservas.fatura');
     });
 
     // ✅ Custom routes for updating password and uploading photo
@@ -73,5 +75,8 @@ Route::middleware(['auth', UserMiddleware::class])->group(function () {
         Route::put('/admin/reservas/{id}', [ReservaController::class, 'adminUpdate'])->name('admin.reservas.update');
         Route::post('/admin/reservas/{id}/refund', [ReservaController::class, 'adminRefund'])->name('admin.reservas.refund');
     });
+
+
+
 
 require __DIR__.'/auth.php';

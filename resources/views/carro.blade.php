@@ -31,18 +31,17 @@
             background: #343a40;
             color: #ccc;
         }
-        /* Custom styles for smaller form */
         .reservation-form-container {
-            max-width: 600px; /* Adjust this value to control form width */
-            margin: 0 auto; /* Centers the form container */
-            padding: 20px; /* Add some padding inside */
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
             border-radius: 8px;
             background-color: #fff;
             box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
         }
         .payment-summary-card {
-            max-width: 400px; /* Adjust this value for payment summary width */
-            margin: 20px auto; /* Centers the payment summary card */
+            max-width: 400px;
+            margin: 20px auto;
         }
     </style>
 </head>
@@ -72,7 +71,7 @@
         <div class="row g-0">
             @if($carro->imagem)
                 <div class="col-md-5">
-                    <img src="{{ $carro->imagem }}" alt="{{ $carro->modelo }}" class="car-image">
+                    <img src="{{ asset($carro->imagem) }}" alt="{{ $carro->modelo }}" class="car-image">
                 </div>
             @endif
             <div class="{{ $carro->imagem ? 'col-md-7' : 'col-md-12' }}">
@@ -162,7 +161,7 @@
 
             {{-- Multibanco Specific Fields --}}
             <div id="multibanco-fields" style="display: none;">
-                <div class="mb-3 text-center"> {{-- Added text-center here for the message --}}
+                <div class="mb-3 text-center">
                     <small class="form-text text-muted">A referência será gerada após a confirmação da reserva.</small>
                 </div>
                 <div class="mb-3 text-center"><small class="form-text text-muted">Estará disponivel em "Gerir Reservas"</small></div>
@@ -171,7 +170,7 @@
             {{-- 🔍 Payment Summary --}}
             <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
 
-            {{-- PayPal Button Container - Centered within the form --}}
+            {{-- PayPal Button Container  --}}
             <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
 
             <div class="text-center">
@@ -179,16 +178,6 @@
             </div>
         </form>
     </div>
-</div>
-
-            {{-- 🔍 Payment Summary --}}
-            <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
-
-            {{-- PayPal Button Container - Centered within the form --}}
-            <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
-        </form>
-    </div>
-</div>
 </div>
 
 ---
@@ -208,11 +197,11 @@
 
         if (method === 'paypal') {
             paypalButtonContainer.style.display = 'block';
-            // PayPal buttons are rendered dynamically, so the 'submit-button' is hidden
-        } else if (method === 'referencia') { // Assuming 'referencia' is for Multibanco
-            // Multibanco fields will be populated by the backend after submission
+            // PayPal buttons are rendered dynamically
+        } else if (method === 'referencia') {
+            // Multibanco fields
             multibancoFields.style.display = 'block';
-            submitButton.style.display = 'inline-block'; // Show generic submit button for Multibanco
+            submitButton.style.display = 'inline-block';
         } else {
             // For any other method, show the generic submit button
             submitButton.style.display = 'inline-block';
@@ -262,15 +251,15 @@
         },
         onApprove: function (data, actions) {
             return actions.order.capture().then(function (details) {
-                // Ensure the form data is correctly retrieved for the fetch request
+                // Ensure the form data is correctly
                 const formData = {
                     bem_locavel_id: '{{ $carro->id }}',
-                    nome_cliente: document.querySelector('input[name="nome_cliente"]').value, // Get dynamic value
-                    email: document.querySelector('input[name="email"]').value,               // Get dynamic value
+                    nome_cliente: document.querySelector('input[name="nome_cliente"]').value,
+                    email: document.querySelector('input[name="email"]').value,
                     data_inicio: document.querySelector('input[name="data_inicio"]').value,
                     data_fim: document.querySelector('input[name="data_fim"]').value,
                     payment_method: 'paypal',
-                    paypal_order_id: details.id // Pass the PayPal Order ID to your backend
+                    paypal_order_id: details.id
                 };
 
                 fetch("{{ route('reserva.paypal') }}", {
@@ -299,10 +288,10 @@
         }
     }).render('#paypal-button-container');
 
-    // Call updatePaymentSummary on page load if dates are already filled (e.g., from old input)
+    // Call updatePaymentSummary on page load
     document.addEventListener('DOMContentLoaded', () => {
         updatePaymentSummary();
-        // Set initial state of payment method fields based on default selection or old input
+        // Set initial state of payment method fields
         const initialPaymentMethod = document.getElementById('payment_method').value;
         togglePaymentMethod(initialPaymentMethod);
     });

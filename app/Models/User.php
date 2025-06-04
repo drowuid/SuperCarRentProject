@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -22,11 +21,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'phone',
-        'profile_photo_path',
+        'profile_picture',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
+     * attributes hidden for serialization.
      *
      * @var list<string>
      */
@@ -36,7 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
      * @return array<string, string>
      */
@@ -55,8 +54,8 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function getProfilePhotoUrlAttribute(): string
     {
-        return $this->profile_photo_path
-            ? asset('storage/' . $this->profile_photo_path)
+        return $this->profile_picture
+            ? asset('storage/' . $this->profile_picture)
             : 'https://via.placeholder.com/150?text=Perfil';
     }
 }

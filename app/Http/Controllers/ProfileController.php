@@ -7,9 +7,9 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
-use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
@@ -23,27 +23,29 @@ class ProfileController extends Controller
         ]);
     }
 
+    /**
+     * Update the user's profile information.
+     */
+    public function update(ProfileUpdateRequest $request): RedirectResponse
+    {
+        $user = $request->user();
 
-public function update(ProfileUpdateRequest $request): RedirectResponse
-{
-    $user = $request->user();
+        $user->fill($request->validated());
 
-    $user->fill($request->validated());
+        // ✅ Save uploaded profile picture to the correct column
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $user->profile_picture = $path;
+        }
 
-    if ($request->hasFile('profile_photo')) {
-        $path = $request->file('profile_photo')->store('profile_photos', 'public');
-        $user->profile_photo_path = $path;
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
-
-    if ($user->isDirty('email')) {
-        $user->email_verified_at = null;
-    }
-
-    $user->save();
-
-    return Redirect::route('profile.edit')->with('status', 'profile-updated');
-}
-
 
     /**
      * Delete the user's account.
@@ -66,41 +68,44 @@ public function update(ProfileUpdateRequest $request): RedirectResponse
         return Redirect::to('/');
     }
 
-    public function uploadPhoto(Request $request)
-{
-    $request->validate([
-        'profile_photo' => 'required|image|max:2048',
-    ]);
+    /**
+     * Optional separate upload photo method (not required if using `update()` above).
+     */
+    public function uploadPhoto(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'profile_photo' => 'required|image|max:2048',
+        ]);
 
-    $user = $request->user();
+        $user = $request->user();
 
-    // Store the image
-    $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        // Remove old photo if it exists
+        if ($user->profile_picture && Storage::disk('public')->exists($user->profile_picture)) {
+            Storage::disk('public')->delete($user->profile_picture);
+        }
 
-    // Delete old photo if exists
-    if ($user->profile_photo && Storage::disk('public')->exists('profile_photos/' . $user->profile_photo)) {
-        Storage::disk('public')->delete('profile_photos/' . $user->profile_photo);
+        // Upload and save new photo
+        $path = $request->file('profile_photo')->store('profile_photos', 'public');
+        $user->profile_picture = $path;
+        $user->save();
+
+        return redirect()->route('profile.edit')->with('status', 'profile-updated');
     }
 
-    // Update user profile
-    $user->profile_photo = basename($path);
-    $user->save();
+    /**
+     * Update user password.
+     */
+    public function updatePassword(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'current_password' => ['required', 'current_password'],
+            'password' => ['required', 'confirmed', 'min:8'],
+        ]);
 
-    return redirect()->route('profile.edit')->with('status', 'profile-updated');
-}
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
 
-public function updatePassword(Request $request)
-{
-    $request->validate([
-        'current_password' => ['required', 'current_password'],
-        'password' => ['required', 'confirmed', 'min:8'],
-    ]);
-
-    $request->user()->update([
-        'password' => Hash::make($request->password),
-    ]);
-
-    return back()->with('status', 'password-updated');
-}
-
+        return back()->with('status', 'password-updated');
+    }
 }

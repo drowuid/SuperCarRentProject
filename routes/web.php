@@ -7,7 +7,10 @@ use App\Http\Controllers\ReservaController;
 use App\Http\Controllers\ReservationConfirmationMailController;
 use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\AdminMessageController;
 use App\Http\Middleware\UserMiddleware;
+use App\Models\Message;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +32,21 @@ Route::middleware(['auth', UserMiddleware::class])->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     //Fatura
     Route::get('/reservas/{id}/fatura', [ReservaController::class, 'downloadFatura'])->name('reservas.fatura');
+
+    // User Help Chat
+Route::middleware(['auth'])->group(function () {
+    Route::get('/pedir-ajuda', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('/pedir-ajuda', [MessageController::class, 'store'])->name('messages.store');
+});
+
+// Admin Chat Panel
+Route::middleware(['auth', 'admin'])->group(function () {
+    Route::get('/admin/messages', [AdminMessageController::class, 'index'])->name('admin.messages');
+    Route::post('/admin/messages/{user}', [AdminMessageController::class, 'reply'])->name('admin.messages.reply');
+});
+
+
+
     });
 
     // ✅ Custom routes for updating password and uploading photo
@@ -67,8 +85,22 @@ Route::middleware(['auth', UserMiddleware::class])->group(function () {
     Route::middleware(['admin'])->group(function () {
 
         Route::get('/admin/dashboard', function () {
-            $reservas = Reserva::with(['carro.marca'])->latest()->get();
-            return view('admin.dashboard', compact('reservas'));
+
+            $reservas = Reserva::with(['carro.marca', 'user'])->latest()->get();
+
+            //consulta para pegar as mensagens do utilizador user ~e sender e recebe
+
+            //com este id conseguimos pegar as mensagens
+           // $reservas->user->id;
+           $user = Auth::user();
+
+           $messages = Message::where(function ($query) use ($user) {
+                $query->where('sender_id', $user->id)
+                      ->orWhere('receiver_id', $user->id);
+            })->orderBy('created_at', 'asc')->get();
+
+           // dd($messages);
+            return view('admin.dashboard', compact('reservas', 'messages'));
         })->name('admin.dashboard');
 
         Route::get('/admin/reservas/{id}/edit', [ReservaController::class, 'adminEdit'])->name('admin.reservas.edit');

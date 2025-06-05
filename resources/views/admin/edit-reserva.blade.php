@@ -25,6 +25,22 @@
         </div>
     </nav>
 
+    @foreach ($reservas as $reserva)
+
+        @if($reserva->payment_status === 'pending')
+            <div class="alert alert-warning text-center">
+                A reserva #{{ $reserva->id }} está pendente de pagamento.
+            </div>
+        @elseif($reserva->payment_status === 'paid')
+            <div class="alert alert-success text-center">
+                A reserva #{{ $reserva->id }} foi paga com sucesso.
+            </div>
+        @elseif($reserva->payment_status === 'refunded')
+            <div class="alert alert-danger text-center">
+                A reserva #{{ $reserva->id }} foi reembolsada.
+            </div>
+        @endif
+
     <div class="container mt-5">
         <h2>Editar Reserva #{{ $reserva->id }}</h2>
 
@@ -83,6 +99,7 @@
             <a href="{{ route('admin.dashboard') }}" class="btn btn-secondary btn-sm">Cancelar</a>
         </form>
     </div>
+      @endforeach
 
 </body>
 </html>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Models\Message;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -58,4 +59,21 @@ class User extends Authenticatable implements MustVerifyEmail
             ? asset('storage/' . $this->profile_picture)
             : 'https://via.placeholder.com/150?text=Perfil';
     }
+
+    public function sentMessages()
+{
+    return $this->hasMany(Message::class, 'sender_id');
+}
+
+public function receivedMessages()
+{
+    return $this->hasMany(Message::class, 'receiver_id');
+}
+
+public function messages() {
+    return $this->hasMany(Message::class);
+}
+
+
+
 }

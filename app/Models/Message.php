@@ -18,5 +18,9 @@ public function receiver()
     return $this->belongsTo(User::class, 'receiver_id');
 }
 
+public function user()
+{
+    return $this->belongsTo(\App\Models\User::class, 'user_id');
+}
 }
 

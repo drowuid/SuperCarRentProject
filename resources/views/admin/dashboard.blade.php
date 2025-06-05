@@ -211,46 +211,42 @@
                     </div>
                 </div>
             </div>
-            {{-- 💬 Mensagens --}}
             <div class="tab-pane fade" id="mensagens" role="tabpanel">
-                <div class="admin-content-card">
-                    <h4 class="mb-3 text-center">Mensagens de Clientes</h4>
+    <div class="admin-content-card">
+        <h4 class="mb-3 text-center">Mensagens de Clientes</h4>
 
-                    @if ($messages->isEmpty())
-                        <p class="text-center text-muted">Nenhuma mensagem recebida.</p>
-                    @else
-                    @foreach ($reservas as $reserva)
-                        @if ($reserva->user)
-                            <div class="mb-5">
-                                <h6 class="text-primary">{{ $reserva->user->name }}
-                                    ({{ $reserva->user->email }})</h6>
+        @forelse ($messages as $userId => $msgs)
+            @php $user = $msgs->first()->user; @endphp
 
-                                <div class="chat-box mb-3">
+            <div class="mb-5 border-bottom pb-3">
+                <h6 class="text-primary">{{ $user->name }} ({{ $user->email }})</h6>
 
-                                    @foreach ($messages as $msg)
-                                        <div class="mb-2 {{ $msg->is_admin ? 'message-admin' : 'message-user' }}">
-                                            <small><strong>{{ $msg->is_admin ? 'Admin' : $reserva->user->name }}:</strong>
-                                                {{ $msg->message }}</small>
-                                        </div>
-                                    @endforeach
-
-                                </div>
-
-                                <form action="{{ route('admin.messages.reply', $reserva->user->id) }}" method="POST"
-                                    class="d-flex">
-                                    @csrf
-                                    <input type="text" name="message" class="form-control me-2"
-                                        placeholder="Responder..." required>
-                                    <button type="submit" class="btn btn-primary">Enviar</button>
-                                </form>
-                            </div>
-                        @else
-                            <p class="text-muted">Nenhuma mensagem recebida.</p>
-                        @endif
+                <div class="bg-light rounded p-3 mb-2" style="max-height: 200px; overflow-y: auto;">
+                    @foreach ($msgs as $msg)
+                        <div class="mb-2 {{ $msg->is_admin ? 'text-end' : 'text-start' }}">
+                            <span class="badge {{ $msg->is_admin ? 'bg-secondary' : 'bg-primary' }}">
+                                {{ $msg->is_admin ? 'Admin' : $user->name }}
+                            </span>
+                            <div>{{ $msg->message }}</div>
+                            <small class="text-muted">{{ $msg->created_at->format('d/m/Y H:i') }}</small>
+                        </div>
                     @endforeach
-                    @endif
                 </div>
+
+                <form action="{{ route('admin.messages.reply', $user->id) }}" method="POST" class="d-flex">
+                    @csrf
+                    <input type="text" name="message" class="form-control me-2" placeholder="Responder..." required>
+                    <button type="submit" class="btn btn-success">Enviar</button>
+                </form>
             </div>
+        @empty
+            <p class="text-center text-muted">Nenhuma mensagem recebida.</p>
+        @endforelse
+    </div>
+</div>
+
+
+
         </div>
     </div>
 

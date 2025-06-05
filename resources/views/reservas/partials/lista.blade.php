@@ -87,24 +87,23 @@
                                 <div>
                                     <small class="text-muted d-block mb-2">Reservado em {{ \Carbon\Carbon::parse($reserva->created_at)->format('d/m/Y H:i') }}</small>
 
-                                    @if ($reserva->payment_status !== 'refunded')
-    <div class="d-flex gap-2">
-        <a href="{{ route('reservas.edit', $reserva->id) }}"
-           class="btn btn-sm btn-outline-primary flex-fill">Editar</a>
+                                    <div class="d-flex flex-wrap gap-2">
+    @if ($reserva->payment_status !== 'refunded')
+        <a href="{{ route('reservas.edit', $reserva->id) }}" class="btn btn-sm btn-outline-primary">Editar</a>
 
-        <form action="{{ route('reservas.destroy', $reserva->id) }}" method="POST" class="m-0 p-0 flex-fill">
+        <form action="{{ route('reservas.destroy', $reserva->id) }}" method="POST" class="d-inline">
             @csrf
             @method('DELETE')
-            <button type="submit" class="btn btn-sm btn-outline-danger w-100"
+            <button type="submit" class="btn btn-sm btn-outline-danger"
                     onclick="return confirm('Tem certeza que deseja cancelar esta reserva?')">
                 Cancelar
             </button>
         </form>
+    @endif
 
-        <a href="{{ route('reservas.fatura', $reserva->id) }}"
-           class="btn btn-sm btn-outline-success flex-fill">Fatura</a>
-    </div>
-@endif
+    {{-- Always show the Fatura button --}}
+    <a href="{{ route('reservas.fatura', $reserva->id) }}" class="btn btn-sm btn-outline-success">Fatura</a>
+</div>
 
                                 </div>
                             </div>

@@ -91,7 +91,7 @@
         {{-- Pedir Ajuda --}}
         <div class="tab-pane fade" id="ajuda" role="tabpanel">
             <div class="card p-4">
-                <h5 class="mb-3">Envie sua dúvida ou problema ao suporte</h5>
+                <h5 class="mb-3">Envie a sua dúvida ou problema ao nosso suporte</h5>
 
                 @if (session('success'))
                     <div class="alert alert-success">{{ session('success') }}</div>
@@ -124,3 +124,4 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+

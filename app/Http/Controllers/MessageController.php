@@ -10,32 +10,49 @@ class MessageController extends Controller
 {
     public function index()
     {
-        $userId = Auth::id();
+        $user = Auth::user();
+        $messages = Message::where('user_id', Auth::id())
+                   ->orderBy('created_at', 'asc')
+                   ->get();
 
-        $messages = Message::where(function ($query) use ($userId) {
-                $query->where('sender_id', $userId)
-                      ->orWhere('receiver_id', $userId);
-            })
-            ->orderBy('created_at', 'asc')
-            ->get();
+return view('messages.index', compact('messages'));
 
-        return view('messages.index', compact('messages'));
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'message' => 'required|string|max:1000',
-        ]);
+{
+    $request->validate([
+        'message' => 'required|string|max:1000',
+    ]);
 
-        Message::create([
-            'sender_id' => Auth::id(),
-            'receiver_id' => 1, // assuming admin always has user ID 1
-            'message' => $request->message,
-        ]);
+    Message::create([
+        'user_id' => Auth::id(),
+        'message' => $request->message,
+        'is_admin' => false,
+    ]);
 
-        return redirect()->route('messages.index')->with('success', 'Mensagem enviada!');
-    }
+    return redirect()->route('messages.index')->with('success', 'Mensagem enviada com sucesso.');
+}
+
+    public function send(Request $request)
+{
+    $validated = $request->validate([
+        'user_id' => 'nullable|exists:users,id', // Only set for admin
+        'message' => 'required|string|max:1000',
+    ]);
+
+    $isAdmin = Auth::user()->is_admin;
+
+    Message::create([
+        'user_id' => $isAdmin ? $validated['user_id'] : Auth::id(),
+        'sender_id' => Auth::id(),
+        'message' => $validated['message'],
+        'is_admin' => $isAdmin,
+    ]);
+
+    return response()->json(['status' => 'success']);
+}
+
 }
 
 

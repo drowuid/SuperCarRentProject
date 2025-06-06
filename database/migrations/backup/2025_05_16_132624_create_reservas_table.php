@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('reservas', function (Blueprint $table) {
-    $table->id(); // this is unsignedBigInteger, but it's your PK so ok
-    $table->integer('bem_locavel_id'); // SIGNED int to match bens_locaveis.id
+    $table->id(); 
+    $table->integer('bem_locavel_id');
     $table->string('nome_cliente');
     $table->string('email');
     $table->date('data_inicio');

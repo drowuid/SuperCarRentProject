@@ -1,9 +1,11 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+
+
 
 return new class extends Migration
 {
@@ -12,6 +14,11 @@ return new class extends Migration
      */
     public function up(): void
     {
+
+        Schema::table('bens_locaveis', function (Blueprint $table) {
+            $table->string('imagem')->nullable();
+        });
+
         $array = [
             'images/cars/toyotaw.png',
             'images/cars/toyotaG.png',

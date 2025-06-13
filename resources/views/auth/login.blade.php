@@ -5,6 +5,14 @@
     <title>SuperCarRent - Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
         .hero {
             background: url('https://images.unsplash.com/photo-1504215680853-026ed2a45def') center center / cover no-repeat;
             color: white;
@@ -26,7 +34,7 @@
         }
         /* Center the login form */
         .login-container {
-            min-height: 80vh;
+            flex: 1 0 auto;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -45,6 +53,9 @@
             font-weight: 700;
             color: #343a40;
             text-align: center;
+        }
+        footer {
+            margin-top: auto;
         }
     </style>
 </head>

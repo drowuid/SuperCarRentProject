@@ -169,7 +169,7 @@
                 </div>
 
                 {{-- 🔍 Payment Summary --}}
-                <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
+            <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
 
                 {{-- PayPal Button Container --}}
                 <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
@@ -276,10 +276,63 @@
         }
     }
 
+    // Payment summary updater
+    function updatePaymentSummary() {
+        const startInput = document.querySelector('input[name="data_inicio"]');
+        const endInput = document.querySelector('input[name="data_fim"]');
+        const paymentSummary = document.getElementById('payment-summary');
+        const paymentMethod = document.getElementById('payment_method') ? document.getElementById('payment_method').value : '';
+        if (!startInput || !endInput || !paymentSummary) return;
+
+        const start = new Date(startInput.value);
+        const end = new Date(endInput.value);
+
+        if (isNaN(start) || isNaN(end) || end <= start) {
+            paymentSummary.style.display = 'none';
+            paymentSummary.innerHTML = '';
+            return;
+        }
+
+        const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        const dailyRate = parseFloat({{ $carro->preco_diario }});
+        const totalAmount = (days * dailyRate).toFixed(2);
+
+        let methodText = '';
+        if (paymentMethod === 'paypal') {
+            methodText = 'PayPal';
+        } else if (paymentMethod === 'referencia') {
+            methodText = 'Referência Multibanco';
+        } else {
+            methodText = 'Não selecionado';
+        }
+
+        paymentSummary.innerHTML = `
+            <h5 class="mb-2">Resumo do Pagamento</h5>
+            <ul class="list-unstyled mb-2">
+                <li><strong>Dias:</strong> ${days}</li>
+                <li><strong>Preço diário:</strong> €${dailyRate.toFixed(2)}</li>
+                <li><strong>Total:</strong> <span class="text-success fw-bold">€${totalAmount}</span></li>
+                <li><strong>Método:</strong> ${methodText}</li>
+            </ul>
+        `;
+        paymentSummary.style.display = 'block';
+    }
+
     // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
         updatePaymentSummary();
         togglePaymentMethod(document.getElementById('payment_method').value);
+
+        // Update summary on payment method change
+        const paymentMethodSelect = document.getElementById('payment_method');
+        if (paymentMethodSelect) {
+            paymentMethodSelect.addEventListener('change', updatePaymentSummary);
+        }
+        // Update summary on date change
+        const startInput = document.querySelector('input[name="data_inicio"]');
+        const endInput = document.querySelector('input[name="data_fim"]');
+        if (startInput) startInput.addEventListener('change', updatePaymentSummary);
+        if (endInput) endInput.addEventListener('change', updatePaymentSummary);
     });
 </script>
 

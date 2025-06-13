@@ -45,7 +45,7 @@ Route::post('/profile/photo', [ProfileController::class, 'uploadPhoto'])->name('
 // ✅ Reservas
 Route::get('/minhas-reservas', [ReservaController::class, 'minhasReservas'])->name('reservas.minhas');
 Route::get('/minhas-reservas/historico', [ReservaController::class, 'historico'])->name('reservas.historico');
-Route::post('/reserva', [ReservaController::class, 'store'])->name('reserva.store');
+Route::post('/reserva', [ReservaController::class, 'store'])->middleware('auth')->name('reserva.store');
 Route::post('/send-email', [ReservationConfirmationMailController::class, 'sendReservationEmail'])->name('send.email');
 Route::get('/reservas/{id}/edit', [ReservaController::class, 'edit'])->name('reservas.edit');
 Route::put('/reservas/{id}', [ReservaController::class, 'update'])->name('reservas.update');

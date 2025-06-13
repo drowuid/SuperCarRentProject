@@ -45,9 +45,8 @@
                     @enderror
                 </div>
 
-                <button type="submit" class="btn w-100 text-white" style="background-color: gold; border-color: gold;">
-    Enviar link de redefinição
-</button>
+                <button type="submit" class="btn btn-warning w-100">Recuperar password</button>
+
 
             </form>
 

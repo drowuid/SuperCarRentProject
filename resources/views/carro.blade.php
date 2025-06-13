@@ -124,59 +124,66 @@
     @endif
 
     <div class="reservation-form-container">
-        <form id="reserva-form" action="{{ route('reserva.store') }}" method="POST">
-            @csrf
-            <input type="hidden" name="bem_locavel_id" value="{{ $carro->id }}">
+        @auth
+            <form id="reserva-form" action="{{ route('reserva.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="bem_locavel_id" value="{{ $carro->id }}">
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="nome_cliente" class="form-label">Nome</label>
-                    <input type="text" name="nome_cliente" class="form-control" value="{{ auth()->user()->name ?? old('nome_cliente') }}" required>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nome_cliente" class="form-label">Nome</label>
+                        <input type="text" name="nome_cliente" class="form-control" value="{{ auth()->user()->name ?? old('nome_cliente') }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">E-mail</label>
+                        <input type="email" name="email" class="form-control" value="{{ auth()->user()->email ?? old('email') }}" required>
+                    </div>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="email" class="form-label">E-mail</label>
-                    <input type="email" name="email" class="form-control" value="{{ auth()->user()->email ?? old('email') }}" required>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="data_inicio" class="form-label">Data de Início</label>
+                        <input type="date" name="data_inicio" class="form-control" value="{{ old('data_inicio') }}" required onchange="updatePaymentSummary()">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="data_fim" class="form-label">Data de Fim</label>
+                        <input type="date" name="data_fim" class="form-control" value="{{ old('data_fim') }}" required onchange="updatePaymentSummary()">
+                    </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="data_inicio" class="form-label">Data de Início</label>
-                    <input type="date" name="data_inicio" class="form-control" value="{{ old('data_inicio') }}" required onchange="updatePaymentSummary()">
+                <div class="mb-3">
+                    <label for="payment_method" class="form-label">Método de Pagamento</label>
+                    <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePaymentMethod(this.value); updatePaymentSummary();">
+                        <option value="">Escolha um método</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="referencia">Referência Multibanco</option>
+                    </select>
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="data_fim" class="form-label">Data de Fim</label>
-                    <input type="date" name="data_fim" class="form-control" value="{{ old('data_fim') }}" required onchange="updatePaymentSummary()">
+
+                {{-- Multibanco Specific Fields --}}
+                <div id="multibanco-fields" style="display: none;">
+                    <div class="mb-3 text-center">
+                        <small class="form-text text-muted">A referência será gerada após a confirmação da reserva.</small>
+                    </div>
+                    <div class="mb-3 text-center"><small class="form-text text-muted">Estará disponível em "Gerir Reservas"</small></div>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <label for="payment_method" class="form-label">Método de Pagamento</label>
-                <select id="payment_method" name="payment_method" class="form-select" required onchange="togglePaymentMethod(this.value); updatePaymentSummary();">
-                    <option value="">Escolha um método</option>
-                    <option value="paypal">PayPal</option>
-                    <option value="referencia">Referência Multibanco</option>
-                </select>
-            </div>
+                {{-- 🔍 Payment Summary --}}
+                <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
 
-            {{-- Multibanco Specific Fields --}}
-            <div id="multibanco-fields" style="display: none;">
-                <div class="mb-3 text-center">
-                    <small class="form-text text-muted">A referência será gerada após a confirmação da reserva.</small>
+                {{-- PayPal Button Container --}}
+                <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-sm" id="submit-button">Confirmar Reserva</button>
                 </div>
-                <div class="mb-3 text-center"><small class="form-text text-muted">Estará disponivel em "Gerir Reservas"</small></div>
-            </div>
-
-            {{-- 🔍 Payment Summary --}}
-            <div id="payment-summary" style="display:none;" class="payment-summary-card card p-3 border-info mb-3"></div>
-
-            {{-- PayPal Button Container  --}}
-            <div id="paypal-button-container" class="text-center mb-3" style="display: none;"></div>
-
+            </form>
+        @else
             <div class="text-center">
-                <button type="submit" class="btn btn-primary btn-sm" id="submit-button">Confirmar Reserva</button>
+                <p class="mb-3 text-muted">É necessário estar registado para efetuar uma reserva.</p>
+                <a href="{{ route('register') }}" class="btn btn-warning">Registar para Reservar</a>
             </div>
-        </form>
+        @endauth
     </div>
 </div>
 
@@ -185,117 +192,97 @@
 {{-- PayPal SDK --}}
 <script src="https://www.paypal.com/sdk/js?client-id=AVUx1ZUO5ji16WxPheuUr_C2qbWxEsVtDYwO6O0vIWD9xw2n9rcA-YPIDq7f6De6p9rSvc-jX-3b3hye&currency=EUR"></script>
 <script>
+    let paypalButtonsRendered = false;
+
+    function renderPayPalButtonsIfNeeded() {
+        if (paypalButtonsRendered) return;
+
+        paypal.Buttons({
+            createOrder: function (data, actions) {
+                const start = new Date(document.querySelector('input[name="data_inicio"]').value);
+                const end = new Date(document.querySelector('input[name="data_fim"]').value);
+                if (isNaN(start) || isNaN(end) || end <= start) {
+                    alert("Selecione um intervalo de datas válido para calcular o preço.");
+                    return;
+                }
+
+                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                const dailyRate = parseFloat({{ $carro->preco_diario }});
+                const totalAmount = (days * dailyRate).toFixed(2);
+
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: { value: totalAmount }
+                    }]
+                });
+            },
+            onApprove: function (data, actions) {
+                return actions.order.capture().then(function (details) {
+                    const formData = {
+                        bem_locavel_id: '{{ $carro->id }}',
+                        nome_cliente: document.querySelector('input[name="nome_cliente"]').value,
+                        email: document.querySelector('input[name="email"]').value,
+                        data_inicio: document.querySelector('input[name="data_inicio"]').value,
+                        data_fim: document.querySelector('input[name="data_fim"]').value,
+                        payment_method: 'paypal',
+                        paypal_order_id: details.id
+                    };
+
+                    fetch("{{ route('reserva.paypal') }}", {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify(formData)
+                    }).then(res => res.json()).then(data => {
+                        if (data.success) {
+                            alert('Reserva efetuada com sucesso via PayPal!');
+                            window.location.href = "{{ route('reservas.minhas') }}";
+                        } else {
+                            alert('Erro ao processar a reserva: ' + (data.message || 'Erro desconhecido.'));
+                        }
+                    }).catch(error => {
+                        console.error('Erro na reserva PayPal:', error);
+                        alert('Ocorreu um erro ao finalizar a reserva. Por favor, tente novamente.');
+                    });
+                });
+            },
+            onError: function (err) {
+                console.warn('Erro do PayPal (ignorado):', err);
+            }
+        }).render('#paypal-button-container');
+
+        paypalButtonsRendered = true;
+    }
+
     function togglePaymentMethod(method) {
         const submitButton = document.getElementById('submit-button');
         const paypalButtonContainer = document.getElementById('paypal-button-container');
         const multibancoFields = document.getElementById('multibanco-fields');
 
-        // Hide all payment-specific elements first
         submitButton.style.display = 'none';
         paypalButtonContainer.style.display = 'none';
         multibancoFields.style.display = 'none';
 
         if (method === 'paypal') {
             paypalButtonContainer.style.display = 'block';
-            // PayPal buttons are rendered dynamically
+            renderPayPalButtonsIfNeeded();
         } else if (method === 'referencia') {
-            // Multibanco fields
             multibancoFields.style.display = 'block';
             submitButton.style.display = 'inline-block';
         } else {
-            // For any other method, show the generic submit button
             submitButton.style.display = 'inline-block';
         }
     }
 
-    function updatePaymentSummary() {
-        const startInput = document.querySelector('input[name="data_inicio"]');
-        const endInput = document.querySelector('input[name="data_fim"]');
-        const summary = document.getElementById('payment-summary');
-
-        const start = new Date(startInput.value);
-        const end = new Date(endInput.value);
-
-        if (!isNaN(start) && !isNaN(end) && end > start) {
-            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-            const dailyRate = parseFloat({{ $carro->preco_diario }});
-            const total = (days * dailyRate).toFixed(2);
-
-            summary.innerHTML = `
-                <h6 class="card-title text-center">Resumo do Pagamento</h6>
-                <p class="card-text mb-1">Duração: <strong>${days} dia(s)</strong></p>
-                <p class="card-text mb-1">Preço por dia: <strong>€${dailyRate}</strong></p>
-                <hr class="my-2">
-                <p class="card-text fs-5 text-success text-center">Total a pagar: <strong>€${total}</strong></p>
-            `;
-            summary.style.display = 'block';
-        } else {
-            summary.innerHTML = '';
-            summary.style.display = 'none';
-        }
-    }
-
-    paypal.Buttons({
-        createOrder: function (data, actions) {
-            const start = new Date(document.querySelector('input[name="data_inicio"]').value);
-            const end = new Date(document.querySelector('input[name="data_fim"]').value);
-            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-            const dailyRate = parseFloat({{ $carro->preco_diario }});
-            const totalAmount = (days * dailyRate).toFixed(2);
-
-            return actions.order.create({
-                purchase_units: [{
-                    amount: { value: totalAmount }
-                }]
-            });
-        },
-        onApprove: function (data, actions) {
-            return actions.order.capture().then(function (details) {
-                // Ensure the form data is correctly
-                const formData = {
-                    bem_locavel_id: '{{ $carro->id }}',
-                    nome_cliente: document.querySelector('input[name="nome_cliente"]').value,
-                    email: document.querySelector('input[name="email"]').value,
-                    data_inicio: document.querySelector('input[name="data_inicio"]').value,
-                    data_fim: document.querySelector('input[name="data_fim"]').value,
-                    payment_method: 'paypal',
-                    paypal_order_id: details.id
-                };
-
-                fetch("{{ route('reserva.paypal') }}", {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify(formData)
-                }).then(res => res.json()).then(data => {
-                    if (data.success) {
-                        alert('Reserva efetuada com sucesso via PayPal!');
-                        window.location.href = "{{ route('reservas.minhas') }}";
-                    } else {
-                        alert('Erro ao processar a reserva: ' + (data.message || 'Erro desconhecido.'));
-                    }
-                }).catch(error => {
-                    console.error('Error during PayPal callback:', error);
-                    alert('Ocorreu um erro ao finalizar a reserva. Por favor, tente novamente.');
-                });
-            });
-        },
-        onError: function (err) {
-            console.error('PayPal error:', err);
-            alert('Ocorreu um erro com o pagamento PayPal. Por favor, tente novamente.');
-        }
-    }).render('#paypal-button-container');
-
-    // Call updatePaymentSummary on page load
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', () => {
         updatePaymentSummary();
-        // Set initial state of payment method fields
-        const initialPaymentMethod = document.getElementById('payment_method').value;
-        togglePaymentMethod(initialPaymentMethod);
+        togglePaymentMethod(document.getElementById('payment_method').value);
     });
 </script>
+
 
 {{-- 📌 Footer --}}
 <footer class="text-center py-4">

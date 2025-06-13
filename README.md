@@ -23,7 +23,7 @@ SuperCarRent (a fictitious company) is a web-based car rental management system 
 - Frontend: Blade templates, Bootstrap 5, Tailwind CSS
 - Database: MySQL
 - Authentication: Laravel Breeze
-- Testing: PHPUnit, Pest (optional)
+- Testing: PHPUnit, Pest 
 - Payment Integration: PayPal API, Fake ATM reference generator
 - Email: Laravel Mail for confirmation and password reset
 - Real-Time Chat: Admin ↔ User messaging system with polling
@@ -35,8 +35,8 @@ SuperCarRent (a fictitious company) is a web-based car rental management system 
 Prerequisites:
 - PHP >= 8.2
 - Composer
-- MySQL or MariaDB
-- Node.js & npm (for frontend assets, optional)
+- MySQL 
+- Node.js & npm
 
 Step-by-Step Setup:
 1. Clone the repository:
@@ -78,6 +78,8 @@ php artisan test
 If using Pest:
 ./vendor/bin/pest
 
+---
+
 Project Features:
 - Secure user registration & login
 - Admin dashboard to manage reservations and chat
@@ -87,6 +89,8 @@ Project Features:
 - PayPal integration for rentals
 - Fake ATM reference generator
 - Invoice generation in PDF
+
+---
 
 To-Do (Future Enhancements):
 - Live WebSockets for chat

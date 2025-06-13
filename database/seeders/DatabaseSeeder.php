@@ -14,18 +14,24 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Prevent duplicate test user
+        User::firstOrCreate(
+            ['email' => 'test@example.com'],
+            [
+                'name' => 'Test User',
+                'password' => Hash::make('password'),
+                'is_admin' => false,
+            ]
+        );
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
-
-        User::create([
-            'name' => 'Admin',
-            'email' => 'admin@supercarrent.com',
-            'password' => Hash::make('admin'), // default password
-            'is_admin' => true,
-        ]);
+        // Prevent duplicate admin
+        User::firstOrCreate(
+            ['email' => 'admin@supercarrent.com'],
+            [
+                'name' => 'Admin',
+                'password' => Hash::make('admin'),
+                'is_admin' => true,
+            ]
+        );
     }
 }

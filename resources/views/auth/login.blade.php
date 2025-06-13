@@ -92,7 +92,7 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="password" class="form-label">Senha</label>
+                    <label for="password" class="form-label">Password</label>
                     <input
                         type="password"
                         class="form-control"
@@ -117,7 +117,7 @@
                 <button type="submit" class="btn btn-warning w-100">Entrar</button>
 
                 <div class="mt-3 text-center">
-                    <a href="{{ route('password.request') }}">Esqueceu a senha?</a>
+                    <a href="{{ route('password.request') }}">Esqueceu-se da password?</a>
                 </div>
             </form>
         </div>

@@ -101,7 +101,8 @@ To-Do (Future Enhancements):
 
 ---
 
-Author:
+-Author-
+
 Developed by: Pedro Rodrigues
 
 Feel free to reach out with feedback or contributions.

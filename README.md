@@ -72,7 +72,8 @@ php artisan key:generate
 php artisan migrate --seed
 npm install
 npm run build
-php artisan serve
+php artisan serve (running on a seperate terminal window)
+npm run dev (running on a seperate terminal window)
 ```
 
 The application will be available at:

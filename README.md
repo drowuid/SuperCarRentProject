@@ -32,7 +32,12 @@ SuperCarRent (a fictitious company) is a web-based car rental management system 
 
 ## ⚙️ How to Run the Project
 
-Make sure your system has the following installed: PHP >= 8.2, Composer, MySQL or MariaDB, Node.js & npm, and Git.
+Make sure your system has the following installed: 
+- PHP >= 8.2
+- Composer 
+- MySQL or MariaDB
+- Node.js & npm
+- Git.
 
 To set up the SuperCarRent project, run the following commands step-by-step:
 

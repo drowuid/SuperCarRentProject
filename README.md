@@ -32,41 +32,66 @@ SuperCarRent (a fictitious company) is a web-based car rental management system 
 
 ## ⚙️ How to Run the Project
 
-Prerequisites:
-- PHP >= 8.2
-- Composer
-- MySQL 
-- Node.js & npm
+Make sure your system has the following installed: PHP >= 8.2, Composer, MySQL or MariaDB, Node.js & npm, and Git.
 
-Step-by-Step Setup:
-1. Clone the repository:
-   git clone https://github.com/drowuid/SuperCarRentProject.git
-   cd supercarrent
+To set up the SuperCarRent project, run the following commands step-by-step:
 
-2. Install PHP dependencies:
-   composer install
+```bash
+git clone https://github.com/drowuid/SuperCarRentProject.git
+cd SuperCarRentProject
+composer install
+cp .env.example .env
+```
 
-3. Set up your .env file:
-   cp .env.example .env
-   Edit .env with your database and mail credentials.
+Then, open the `.env` file in your code editor and set the database and mail credentials, for example:
 
-4. Generate application key:
-   php artisan key:generate
+```dotenv
+DB_DATABASE=locacao
+DB_USERNAME=root
+DB_PASSWORD=your_password_here
 
-5. Run migrations and seed data:
-   php artisan migrate --seed
+MAIL_MAILER=smtp
+MAIL_HOST=smtp.mailtrap.io
+MAIL_PORT=2525
+MAIL_USERNAME=your_mail_username
+MAIL_PASSWORD=your_mail_password
+MAIL_ENCRYPTION=tls
+MAIL_FROM_ADDRESS=noreply@supercarrent.com
+MAIL_FROM_NAME="SuperCarRent"
+```
 
-6. Serve the application:
-   php artisan serve
+Then continue in the terminal:
 
-   The app should now be running at:  
-   http://127.0.0.1:8000
+```bash
+php artisan key:generate
+php artisan migrate --seed
+npm install
+npm run build
+php artisan serve
+```
+
+The application will be available at:
+
+http://127.0.0.1:8000
 
 Admin Credentials (default):
 Email: admin@supercarrent.com
 Password: admin
 
-You can change these in the DatabaseSeeder.php or directly in the database.
+(You can change these in the `DatabaseSeeder.php` or directly in the database.)
+
+To run tests:
+
+```bash
+php artisan test
+```
+
+If using Pest:
+
+```bash
+./vendor/bin/pest
+```
+
 
 
 ---

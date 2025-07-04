@@ -48,12 +48,14 @@ composer install
 cp .env.example .env
 ```
 
-Then, open the `.env` file in your code editor and set the database and mail credentials, for example:
+Then, open the `.env` file in your code editor and set the database and mail credentials, the best example is:
 
 ```dotenv
-DB_DATABASE=locacao
+APP_NAME=SuperCarRent (This is necessary to assoociate the company's name to the top bar)
+
+DB_DATABASE=super_car_rent
 DB_USERNAME=root
-DB_PASSWORD=your_password_here
+DB_PASSWORD=your_password_here (you can leave it blank)
 
 MAIL_MAILER=smtp
 MAIL_HOST=smtp.mailtrap.io

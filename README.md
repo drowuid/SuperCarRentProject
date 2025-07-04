@@ -131,6 +131,7 @@ To-Do (Future Enhancements):
 - Role-based permissions
 - SMS notifications
 - Calendar-based booking view
+- Footer links are just cosmetic with no actual linking, will have to be implemented in the future
 
 
 ---
